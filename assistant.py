@@ -3,8 +3,8 @@ import pickle
 from colorama import Fore, Style
 
 from utils import input_error
-from models import AddressBook, Name, Phone, Birthday
-from record import Record
+from models import Name, Phone, Birthday
+from record import AddressBook, Record
 
 
 def output(message: str, mtype: str):
@@ -127,7 +127,11 @@ def main():
             case 'show-birthday':
                 output(*show_birthday(command[1:], book))
             case 'birthdays':
-                output(*book.get_upcoming_birthdays())
+                try:
+                    days = int(command[1])
+                except IndexError:
+                    days = 7
+                output(*book.get_upcoming_birthdays(days))
             case 'all':
                 output(*show_all(book))
             case _:
