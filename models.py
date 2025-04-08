@@ -46,3 +46,28 @@ class Birthday(Field):
     @input_error
     def validate_bd(self, birthday):
         self.value = dtdt.strptime(birthday, "%d.%m.%Y").date()
+
+
+# Створила клас None
+class Note:
+    def __init__(self, text, title=None):
+        self.validate_title(title)
+        self.validate_text(text)
+        self.created_date = dtdt.now()
+        self.updated_date = dtdt.now()
+
+# Валідація тексту та назви нотатки, додала лише перевірку основних параметрів при вводі тексту
+    @input_error
+    def validate_title(self, title):
+        if title is not None and type(title) is str:
+            if len(title) < 15:
+                self.title = title
+            else:
+                raise ValueError("Title has to have less that 15 symbols")
+                
+    @input_error
+    def validate_text(self, text):
+        if text is None or text.strip() == "":
+            raise ValueError("Note cannot be empty")
+        
+            
