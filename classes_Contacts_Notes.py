@@ -36,6 +36,8 @@ class Contact:
   def __repr__(self):
     return f"Contact(name='{self._name}')"
   
+  
+  
 
   # Геттери та сеттери
   @property
