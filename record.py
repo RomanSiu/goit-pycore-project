@@ -3,7 +3,7 @@ from datetime import timedelta
 from collections import UserDict
 
 from utils import input_error
-from models import Name, Phone, Birthday
+from models import Name, Phone, Birthday, Note
 
 
 class Record:
@@ -11,6 +11,8 @@ class Record:
         self.name = Name(name)
         self.phones = []
         self.birthday = None
+        # додала порожній список до полів для нотаток
+        self.notes = []
 
     def __str__(self):
         return f"Contact name: {self.name.value}, phones: {'; '.join(str(p.value) for p in self.phones)}"
