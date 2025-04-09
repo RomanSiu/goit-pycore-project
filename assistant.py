@@ -1,10 +1,12 @@
 import pickle
 
+import shlex
+
 from colorama import Fore, Style
 
 from utils import input_error
-from models import Name, Phone, Birthday
-from record import AddressBook, Record
+from models import Name, Phone, Birthday, NoteText, Title
+from record import AddressBook, Record, NoteBook, Note
 
 
 def output(message: str, mtype: str):
@@ -90,26 +92,52 @@ def show_birthday(args, book):
         return record
 
 
+# Створення функції add_note та find_not длф запису та пошуку нотаток за назвою
+@input_error
+def add_note(args, book):
+    title, text = args
+    note = book.find_note(title)
+    if not isinstance(note, Note):
+        note = Note(title, text)
+        message = book.add_note(note)
+    else:
+        message = "Note with this title already exists. Change the title", "warning"
+    return message
 
-def save_data(book, filename="data/addressbook.pkl"):
+@input_error
+def find_note(title, book):
+    note = book.find_note(title)
+    if isinstance(note, Note):
+        message = str(note), "common"
+    else:
+        message = "Note with this title doesn't exists.", "warning"
+    return message
+
+# Серіалізація даних в окремий файл з обох книг
+def save_data(books, filename="data/addressbook_and_notebook.pkl"):
     with open(filename, "wb") as f:
-        pickle.dump(book, f)
+        pickle.dump(books, f)
 
 
-def load_data(filename="data/addressbook.pkl"):
+# Завантаження даних з файлу з кортежами обох книг та повернення у разі провало також обох з них
+def load_data(filename="data/addressbook_and_notebook.pkl"):
     try:
         with open(filename, "rb") as f:
             return pickle.load(f)
     except FileNotFoundError:
-        return AddressBook()
+        return AddressBook(), NoteBook()
 
 
+# В main() я додаю необхідні команди для додавання та пошуку нотаток, 
+# виправила command, оскільки при старому варіанті він розділятиме усі слова у нотатці 
+# замість прийняття тексту в лапках, як одного з параметрів
 def main():
-    book = load_data()
+    addressbook, notebook = load_data()
     print("Welcome to the assistant bot!")
     while True:
-        command = input("Write a command: ")
-        command = command.lower().split(' ')
+        command = shlex.split(input("Write a command: "))
+        command[0] = command[0].lower()
+        # command = command.lower().split(' ')
 
         match command[0]:
             case 'exit' | 'close':
@@ -118,26 +146,30 @@ def main():
             case 'hello':
                 print("How can I help you?")
             case 'add':
-                output(*add_contact(command[1:], book))
+                output(*add_contact(command[1:], addressbook))
             case 'change':
-                output(*change_contact(command[1:], book))
+                output(*change_contact(command[1:], addressbook))
             case 'phone':
-                output(*show_phone(command[1:], book))
+                output(*show_phone(command[1:], addressbook))
             case 'add-birthday':
-                output(*add_birthday(command[1:], book))
+                output(*add_birthday(command[1:], addressbook))
             case 'show-birthday':
-                output(*show_birthday(command[1:], book))
+                output(*show_birthday(command[1:], addressbook))
             case 'birthdays':
                 try:
                     days = int(command[1])
                 except IndexError:
                     days = 7
-                output(*book.get_upcoming_birthdays(days))
+                output(*addressbook.get_upcoming_birthdays(days))
+            case 'add-note':
+                output(*add_note(command[1:], notebook))
+            case 'find-note':
+                output(*find_note(command[1], notebook))
             case 'all':
-                output(*show_all(book))
+                output(*show_all(addressbook))
             case _:
                 output("Invalid command.", "error")
-    save_data(book)
+    save_data((addressbook, notebook))
 
 
 if __name__ == '__main__':

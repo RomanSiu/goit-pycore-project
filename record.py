@@ -3,7 +3,7 @@ from datetime import timedelta
 from collections import UserDict
 
 from utils import input_error
-from models import Name, Phone, Birthday, Note
+from models import Name, Phone, Birthday, NoteText, Title
 
 
 class Record:
@@ -11,8 +11,6 @@ class Record:
         self.name = Name(name)
         self.phones = []
         self.birthday = None
-        # додала порожній список до полів для нотаток
-        self.notes = []
 
     def __str__(self):
         return f"Contact name: {self.name.value}, phones: {'; '.join(str(p.value) for p in self.phones)}"
@@ -69,7 +67,45 @@ class Record:
         if self.birthday is None:
             return "No birthday found.", "warning"
         return f"{self.name.value.capitalize()}'s birthday: {dtdt.strftime(self.birthday.value, '%d.%m.%Y')}"
+    
+# Клас Note відповідає за труктурований вивід даних нотаток
+class Note:
+    def __init__(self, title, text):
+        self.title = Title(title)
+        self.text = NoteText(text)
+        self.created_date = dtdt.now().replace(microsecond=0)
+        self.updated_date = dtdt.now().replace(microsecond=0)
+    
+    def __str__(self):
+        return (f"Title: {self.title.value}\n"
+                f"Content: {self.text.value}\n"
+                f"Created: {self.created_date}\n"
+                f"Updated: {self.updated_date}\n")
 
+# Створила клас NoteBook за принципом AddressBook, який відповідатиме за прийняття даних 
+# нотаток та основний функціонал додавання, пошуку та видалення
+class NoteBook:
+    def __init__(self):
+        super().__init__()
+        self.notes = []
+
+    @input_error
+    def add_note(self, note):
+        self.notes.append(note)
+        return "Note added.", "success"
+    
+    @input_error
+    def find_note(self, title):
+        for note in self.notes:
+            if note.title.value.lower() == title.lower():
+                return note
+    
+    @input_error
+    def delete_note(self, title):
+        for note in self.notes:
+            if note.title.value.lower() == title.lower():
+                self.notes.remove(note)
+                return "Note deleted.", "success"
 
 class AddressBook(UserDict):
     @input_error
