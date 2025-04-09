@@ -46,3 +46,16 @@ class Birthday(Field):
     @input_error
     def validate_bd(self, birthday):
         self.value = dtdt.strptime(birthday, "%d.%m.%Y").date()
+
+
+class Address(Field):
+    def __init__(self, value):
+        self.value = None
+        self.validate(value)
+
+    @input_error
+    def validate(self, address):
+        if address.isalpha():
+            self.value = address
+        else:
+            self.value = None

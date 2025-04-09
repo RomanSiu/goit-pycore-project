@@ -3,7 +3,7 @@ from datetime import timedelta
 from collections import UserDict
 
 from utils import input_error
-from models import Name, Phone, Birthday
+from models import Name, Phone, Birthday, Address
 
 
 class Record:
@@ -11,9 +11,17 @@ class Record:
         self.name = Name(name)
         self.phones = []
         self.birthday = None
+        self.address = None
 
     def __str__(self):
-        return f"Contact name: {self.name.value}, phones: {'; '.join(str(p.value) for p in self.phones)}"
+        birthday_str = ""
+        address_str = ""
+        if self.birthday:
+            birthday_str = f"birthday: {self.birthday.strftime('%d.%m.%Y')}"
+        if self.address:
+            address_str = f"address: {self.address}"
+        return (f"Contact name: {self.name.value}, phones: {'; '.join(str(p.value) for p in self.phones)}"
+                + birthday_str + address_str)
 
     @input_error
     def add_phone(self, phone):
@@ -67,6 +75,37 @@ class Record:
         if self.birthday is None:
             return "No birthday found.", "warning"
         return f"{self.name.value.capitalize()}'s birthday: {dtdt.strftime(self.birthday.value, '%d.%m.%Y')}"
+
+    @input_error
+    def add_address(self, address: str, *args) -> tuple:
+        address = Address(address)
+        if address.value is None:
+            return "Please enter a valid address.", "warning"
+        else:
+            self.address = address
+            return "Address added.", "success"
+
+    @input_error
+    def show_address(self, *args) -> tuple:
+        if self.address is None:
+            return "No address found.", "warning"
+        return self.address.value, "common"
+
+    @input_error
+    def edit_address(self, address: str, *args) -> tuple:
+        address = Address(address)
+        if self.address is None:
+            return "No address found.", "warning"
+        elif address.value is None:
+            return "Please enter a valid address.", "warning"
+        else:
+            self.address = address
+            return "Address changed.", "success"
+
+    @input_error
+    def delete_address(self, *args) -> tuple:
+        self.address = None
+        return "Address deleted.", "success"
 
 
 class AddressBook(UserDict):
