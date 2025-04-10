@@ -47,7 +47,7 @@ class Birthday(Field):
     def validate_bd(self, birthday):
         self.value = dtdt.strptime(birthday, "%d.%m.%Y").date()
 
-# За прикладом інших класів у файлі, проводить валідацію назви нотатки
+
 class Title(Field):
     def __init__(self, value):
         super().__init__(value)
@@ -59,9 +59,8 @@ class Title(Field):
             self.value = title
         else:
             self.value = None
-            return "Title must be 15 characters or less.", "warning"
 
-# Також здійснює валідацію, але вже тексту нотатки
+
 class NoteText(Field):
     def __init__(self, value):
         super().__init__(value)
@@ -73,4 +72,3 @@ class NoteText(Field):
             self.value = text
         else:
             self.value = None
-            return "Note cannot be empty.", "warning"

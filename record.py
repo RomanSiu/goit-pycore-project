@@ -68,7 +68,7 @@ class Record:
             return "No birthday found.", "warning"
         return f"{self.name.value.capitalize()}'s birthday: {dtdt.strftime(self.birthday.value, '%d.%m.%Y')}"
     
-# Клас Note відповідає за труктурований вивід даних нотаток
+
 class Note:
     def __init__(self, title, text):
         self.title = Title(title)
@@ -82,8 +82,7 @@ class Note:
                 f"Created: {self.created_date}\n"
                 f"Updated: {self.updated_date}\n")
 
-# Створила клас NoteBook за принципом AddressBook, який відповідатиме за прийняття даних 
-# нотаток та основний функціонал додавання, пошуку та видалення
+
 class NoteBook:
     def __init__(self):
         super().__init__()
@@ -91,6 +90,10 @@ class NoteBook:
 
     @input_error
     def add_note(self, note):
+        if note.text.value is None:
+            return "Note cannot be empty.", "warning"
+        elif note.title.value is None:
+            return "Title must be 15 characters or less.", "warning"
         self.notes.append(note)
         return "Note added.", "success"
     
@@ -106,6 +109,7 @@ class NoteBook:
             if note.title.value.lower() == title.lower():
                 self.notes.remove(note)
                 return "Note deleted.", "success"
+
 
 class AddressBook(UserDict):
     @input_error

@@ -92,7 +92,6 @@ def show_birthday(args, book):
         return record
 
 
-# Створення функції add_note та find_not длф запису та пошуку нотаток за назвою
 @input_error
 def add_note(args, book):
     title, text = args
@@ -104,6 +103,7 @@ def add_note(args, book):
         message = "Note with this title already exists. Change the title", "warning"
     return message
 
+
 @input_error
 def find_note(title, book):
     note = book.find_note(title)
@@ -112,6 +112,7 @@ def find_note(title, book):
     else:
         message = "Note with this title doesn't exists.", "warning"
     return message
+
 
 # Серіалізація даних в окремий файл з обох книг
 def save_data(books, filename="data/addressbook_and_notebook.pkl"):
@@ -128,16 +129,12 @@ def load_data(filename="data/addressbook_and_notebook.pkl"):
         return AddressBook(), NoteBook()
 
 
-# В main() я додаю необхідні команди для додавання та пошуку нотаток, 
-# виправила command, оскільки при старому варіанті він розділятиме усі слова у нотатці 
-# замість прийняття тексту в лапках, як одного з параметрів
 def main():
     addressbook, notebook = load_data()
     print("Welcome to the assistant bot!")
     while True:
         command = shlex.split(input("Write a command: "))
         command[0] = command[0].lower()
-        # command = command.lower().split(' ')
 
         match command[0]:
             case 'exit' | 'close':
