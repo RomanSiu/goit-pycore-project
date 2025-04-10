@@ -3,7 +3,7 @@ from datetime import timedelta
 from collections import UserDict
 
 from utils import input_error
-from models import Name, Phone, Birthday, Address
+from models import Name, Phone, Birthday, NoteText, Title, Address
 
 
 class Record:
@@ -75,6 +75,48 @@ class Record:
         if self.birthday is None:
             return "No birthday found.", "warning"
         return f"{self.name.value.capitalize()}'s birthday: {dtdt.strftime(self.birthday.value, '%d.%m.%Y')}"
+    
+
+class Note:
+    def __init__(self, title, text):
+        self.title = Title(title)
+        self.text = NoteText(text)
+        self.created_date = dtdt.now().replace(microsecond=0)
+        self.updated_date = dtdt.now().replace(microsecond=0)
+    
+    def __str__(self):
+        return (f"Title: {self.title.value}\n"
+                f"Content: {self.text.value}\n"
+                f"Created: {self.created_date}\n"
+                f"Updated: {self.updated_date}\n")
+
+
+class NoteBook:
+    def __init__(self):
+        super().__init__()
+        self.notes = []
+
+    @input_error
+    def add_note(self, note):
+        if note.text.value is None:
+            return "Note cannot be empty.", "warning"
+        elif note.title.value is None:
+            return "Title must be 15 characters or less.", "warning"
+        self.notes.append(note)
+        return "Note added.", "success"
+    
+    @input_error
+    def find_note(self, title):
+        for note in self.notes:
+            if note.title.value.lower() == title.lower():
+                return note
+    
+    @input_error
+    def delete_note(self, title):
+        for note in self.notes:
+            if note.title.value.lower() == title.lower():
+                self.notes.remove(note)
+                return "Note deleted.", "success"
 
     @input_error
     def add_address(self, address: str, *args) -> tuple:
