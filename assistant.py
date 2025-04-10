@@ -4,7 +4,7 @@ import shlex
 from colorama import Fore, Style
 
 from utils import input_error
-from models import Name, Phone, Birthday, NoteText, Title, Adress
+from models import Name, Phone, Birthday, NoteText, Title, Address
 from record import AddressBook, Record, NoteBook, Note
 
 
