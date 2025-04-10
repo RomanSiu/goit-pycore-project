@@ -1,30 +1,44 @@
 import pickle
+import os
+import shlex
 
 from colorama import Fore, Style
 
 from utils import input_error
-from models import Name, Phone, Birthday, Address, Email
-from record import AddressBook, Record
+from models import Name, Phone, Birthday, Address, Email, NoteText, Title
+from record import AddressBook, Record, NoteBook, Note
+from ui_helpers import user_input, user_output
+from tableview import show_table
 
 
 def output(message: str, mtype: str):
     if mtype == 'success':
-        print(Fore.GREEN + message + Style.RESET_ALL)
+        user_output(Fore.GREEN + message + Style.RESET_ALL)
     elif mtype == 'warning':
-        print(Fore.YELLOW + message + Style.RESET_ALL)
+        user_output(Fore.YELLOW + message + Style.RESET_ALL)
     elif mtype == 'error':
-        print(Fore.RED + message + Style.RESET_ALL)
+        user_output(Fore.RED + message + Style.RESET_ALL)
     elif mtype == 'common list':
         for m in message:
-            print(Fore.BLUE + m + Style.RESET_ALL)
+            user_output(Fore.BLUE + m + Style.RESET_ALL)
     elif mtype == 'common':
-        print(Fore.BLUE + message + Style.RESET_ALL)
+        user_output(Fore.BLUE + message + Style.RESET_ALL)
     else:
-        print(message)
+        user_output(message)
 
 
 @input_error
-def add_contact(args, book):
+def add_contact(args: list, book: AddressBook) -> tuple:
+    """
+    Add a contact to the book.
+
+    Args:
+        args (list): Argument list from command line.
+        book (AddressBook): Address book to save records.
+
+    Returns:
+        tuple: Message.
+    """
     name, phone, *_ = args
     record = book.find(name)
     if type(record) is tuple:
@@ -37,7 +51,17 @@ def add_contact(args, book):
 
 
 @input_error
-def change_contact(args, book):
+def change_contact(args: list, book: AddressBook) -> tuple:
+    """
+    Change phone number to the contact.
+
+    Args:
+        args (list): Argument list from command line.
+        book (AddressBook): Address book to save records.
+
+    Returns:
+        tuple: Message.
+    """
     name, old_phone, new_phone, *_ = args
     record = book.find(name)
     if type(record) is not tuple:
@@ -48,7 +72,17 @@ def change_contact(args, book):
 
 
 @input_error
-def show_phone(args, book):
+def show_phone(args: list, book: AddressBook) -> tuple:
+    """
+    Return list of phone numbers for a contact.
+
+    Args:
+        args (list): Argument list from command line.
+        book (AddressBook): Address book to save records.
+
+    Returns:
+        tuple: Tuple with list of phones or with message.
+    """
     name, *_ = args
     record = book.find(name)
     if type(record) is not tuple:
@@ -59,16 +93,38 @@ def show_phone(args, book):
 
 
 @input_error
-def show_all(book):
-    phones = []
+def show_all(book: AddressBook) -> tuple:
+    """
+    Return list of all contacts.
+
+    Args:
+        book (AddressBook): Address book to save records.
+
+    Returns:
+        tuple: Tuple with list of contacts or with message.
+    """
+    rows = []
     for rec in book.values():
-        rec_phones = ", ".join([i.value for i in rec.phones])
-        phones.append(f"{rec.name.value.capitalize()}: {rec_phones}")
-    return phones, "common list"
+        name = rec.name.value.capitalize()
+        phones = "; ".join(p.value for p in rec.phones)
+        birthday = rec.birthday.value.strftime('%d.%m.%Y') if rec.birthday else "-"
+        # ❗ Тепер повертаємо список з трьох колонок
+        rows.append([name, phones, birthday])
+    return rows, "table"
 
 
 @input_error
-def add_birthday(args, book):
+def add_birthday(args: list, book: AddressBook) -> tuple:
+    """
+    Add birthday to contact.
+
+    Args:
+        args (list): Argument list from command line.
+        book (AddressBook): Address book to save records.
+
+    Returns:
+        tuple: Message.
+    """
     name, birthday, *_ = args
     record = book.find(name)
     if type(record) is not tuple:
@@ -79,7 +135,17 @@ def add_birthday(args, book):
 
 
 @input_error
-def show_birthday(args, book):
+def show_birthday(args: list, book: AddressBook) -> tuple:
+    """
+    Show birthday of a contact.
+
+    Args:
+        args (list): Argument list from command line.
+        book (AddressBook): Address book to save records.
+
+    Returns:
+        tuple: Tuple with contacts birthday or with message.
+    """
     name, *_ = args
     record = book.find(name)
     if type(record) is not tuple:
@@ -90,7 +156,40 @@ def show_birthday(args, book):
 
 
 @input_error
+def add_note(args, book):
+    title, text = args
+    note = book.find_note(title)
+    if not isinstance(note, Note):
+        note = Note(title, text)
+        message = book.add_note(note)
+    else:
+        message = "Note with this title already exists. Change the title", "warning"
+    return message
+
+
+@input_error
+def find_note(title, book):
+    note = book.find_note(title)
+    if isinstance(note, Note):
+        message = str(note), "common"
+    else:
+        message = "Note with this title doesn't exists.", "warning"
+    return message
+
+  
+@input_error
 def address(args: list, book: AddressBook, func: str) -> tuple:
+    """
+    Call func to interact with an address of a contact.
+
+    Args:
+        args (list): Argument list from command line.
+        book (AddressBook): Address book to save records.
+        func (str): Function to call to interact with an address.
+
+    Returns:
+        tuple: Tuple with address or with message.
+    """
     record = book.find(args[0])
     if type(record) is not tuple:
         address_func = getattr(record, func)
@@ -135,69 +234,78 @@ def delete_email(args, book):
     return "Contact not found.", "warning"
 
 
-def save_data(book, filename="data/addressbook.pkl"):
+# Серіалізація даних в окремий файл з обох книг
+def save_data(books, filename="data/addressbook_and_notebook.pkl"):
+    # створює директорію, якщо вона не існує
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
     with open(filename, "wb") as f:
-        pickle.dump(book, f)
+        pickle.dump(books, f)
 
 
-def load_data(filename="data/addressbook.pkl"):
+# Завантаження даних з файлу з кортежами обох книг та повернення у разі провало також обох з них
+def load_data(filename="data/addressbook_and_notebook.pkl"):
     try:
         with open(filename, "rb") as f:
             return pickle.load(f)
     except FileNotFoundError:
-        return AddressBook()
+        return AddressBook(), NoteBook()
 
 
 def main():
-    book = load_data()
-    print("Welcome to the assistant bot!")
+    addressbook, notebook = load_data()
+    user_output("Welcome to the assistant bot!")
     while True:
-        command = input("Write a command: ")
-        command = command.lower().split(' ')
+        command = shlex.split(input("Write a command: "))
+        command[0] = command[0].lower()
+
 
         match command[0]:
             case 'exit' | 'close':
-                print("Good bye!")
+                user_output("Good bye!")
                 break
             case 'hello':
-                print("How can I help you?")
+                user_output("How can I help you?")
             case 'add':
-                output(*add_contact(command[1:], book))
+                output(*add_contact(command[1:], addressbook))
             case 'change':
-                output(*change_contact(command[1:], book))
+                output(*change_contact(command[1:], addressbook))
             case 'phone':
-                output(*show_phone(command[1:], book))
+                output(*show_phone(command[1:], addressbook))
             case 'add-address':
-                output(*address(command[1:], book, "add_address"))
+                output(*address(command[1:], addressbook, "add_address"))
             case 'show-address':
-                output(*address(command[1:], book, "show_address"))
+                output(*address(command[1:], addressbook, "show_address"))
             case 'change-address':
-                output(*address(command[1:], book, "edit_address"))
+                output(*address(command[1:], addressbook, "edit_address"))
             case 'delete-address':
-                output(*address(command[1:], book, "delete_address"))
+              output(*address(command[1:], addressbook, "delete_address"))
             case 'add-email':
-                output(*add_email(command[1:], book))
+                output(*add_email(command[1:], addressbook))
             case 'change-email':
-                output(*edit_email(command[1:], book))
+                output(*edit_email(command[1:], addressbook))
             case 'show-email':
-                output(*show_email(command[1:], book))
+                output(*show_email(command[1:], addressbook))
             case 'delete-email':
-                output(*delete_email(command[1:], book))
+                output(*delete_email(command[1:], addressbook))
             case 'add-birthday':
-                output(*add_birthday(command[1:], book))
+                output(*add_birthday(command[1:], addressbook))
             case 'show-birthday':
-                output(*show_birthday(command[1:], book))
+                output(*show_birthday(command[1:], addressbook))
             case 'birthdays':
                 try:
                     days = int(command[1])
                 except IndexError:
                     days = 7
-                output(*book.get_upcoming_birthdays(days))
+                output(*addressbook.get_upcoming_birthdays(days))
+            case 'add-note':
+                output(*add_note(command[1:], notebook))
+            case 'find-note':
+                output(*find_note(command[1], notebook))
             case 'all':
-                output(*show_all(book))
+                show_table(*show_all(addressbook))
             case _:
                 output("Invalid command.", "error")
-    save_data(book)
+    save_data((addressbook, notebook))
 
 
 if __name__ == '__main__':
