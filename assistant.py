@@ -25,7 +25,7 @@ def output(message: str, mtype: str):
 
 
 @input_error
-def add_contact(args, book):
+def add_contact(args, book: AddressBook):
     name, phone, *_ = args
     record = book.find(name)
     if type(record) is tuple:
@@ -38,7 +38,7 @@ def add_contact(args, book):
 
 
 @input_error
-def change_contact(args, book):
+def change_contact(args, book: AddressBook):
     name, old_phone, new_phone, *_ = args
     record = book.find(name)
     if type(record) is not tuple:
@@ -49,7 +49,7 @@ def change_contact(args, book):
 
 
 @input_error
-def show_phone(args, book):
+def show_phone(args, book: AddressBook):
     name, *_ = args
     record = book.find(name)
     if type(record) is not tuple:
@@ -60,7 +60,7 @@ def show_phone(args, book):
 
 
 @input_error
-def show_all(book):
+def show_all(book: AddressBook):
     phones = []
     for rec in book.values():
         rec_phones = ", ".join([i.value for i in rec.phones])
@@ -69,7 +69,7 @@ def show_all(book):
 
 
 @input_error
-def add_birthday(args, book):
+def add_birthday(args, book: AddressBook):
     name, birthday, *_ = args
     record = book.find(name)
     if type(record) is not tuple:
@@ -80,7 +80,7 @@ def add_birthday(args, book):
 
 
 @input_error
-def show_birthday(args, book):
+def show_birthday(args, book: AddressBook):
     name, *_ = args
     record = book.find(name)
     if type(record) is not tuple:
@@ -93,19 +93,24 @@ def show_birthday(args, book):
 
 # Створення функції add_note та find_not длф запису та пошуку нотаток за назвою
 @input_error
-def add_note(args, book):
-    title, text = args
+def interactive_add_note(book: NoteBook):
+    title = input("Write the title of the note:\n>  ")
+    title_obj = Title(title)
+    if title_obj.value is None:
+        return output("Title must be 15 characters or less.", "warning")
+    text = input("Write the text of the note:\n>  ")
     note = book.find_note(title)
     if not isinstance(note, Note):
         note = Note(title, text)
         message = book.add_note(note)
     else:
         message = "Note with this title already exists. Change the title", "warning"
-    return message
+    output(*message)
 
 
 @input_error
-def find_note(title, book):
+def find_note(args, book: NoteBook):
+    title = args[0]
     note = book.find_note(title)
     if isinstance(note, Note):
         message = str(note), "common"
@@ -113,7 +118,45 @@ def find_note(title, book):
         message = "Note with this title doesn't exists.", "warning"
     return message
 
-  
+@input_error
+def interactive_edit_note(book: NoteBook):
+    title = input("Write the title of the note to edit:\n>  ")
+    note = book.find_note(title)
+    if not note:
+        return output("Note with this title doesn't exists.", "warning")
+    new_text = input("Write the new text for the note:\n>  ")
+    message = book.edit_note(title, new_text)
+    return output(*message)
+
+@input_error
+def delete_note(args, book: NoteBook):
+    title = args[0]
+    if not title.strip():
+        return "Note title cannot be empty.", "warning"
+    message = book.delete_note(title)
+    if message is None:
+        return "Note not found.", "warning"
+    return message
+
+@input_error
+def show_all_notes(book):
+    notes = book.show_all_notes()
+    if not notes:
+        return "No notes found.", "warning"
+    return notes, "common list"
+
+@input_error
+def search_notes(args, book):
+    keyword = args[0]
+    if not keyword.strip():
+        return "Please, enter a keyword.", "warning"
+    message = book.search_notes(keyword)
+    if not message:
+        return "No matches found.", "warning"
+    return ["The results of the search:"] + message, "common list"
+
+
+
 @input_error
 def address(args: list, book: AddressBook, func: str) -> tuple:
     record = book.find(args[0])
@@ -177,9 +220,17 @@ def main():
                     days = 7
                 output(*addressbook.get_upcoming_birthdays(days))
             case 'add-note':
-                output(*add_note(command[1:], notebook))
+                interactive_add_note(notebook)
             case 'find-note':
-                output(*find_note(command[1], notebook))
+                output(*find_note(command[1:], notebook))
+            case 'edit-note':
+                interactive_edit_note(notebook)
+            case 'delete-note':
+                output(*delete_note(command[1:], notebook))
+            case 'show-all-notes':
+                output(*show_all_notes(notebook))
+            case 'search-notes':
+                output(*search_notes(command[1:], notebook))
             case 'all':
                 output(*show_all(addressbook))
             case _:

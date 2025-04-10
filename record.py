@@ -131,8 +131,6 @@ class NoteBook:
     def add_note(self, note):
         if note.text.value is None:
             return "Note cannot be empty.", "warning"
-        elif note.title.value is None:
-            return "Title must be 15 characters or less.", "warning"
         self.notes.append(note)
         return "Note added.", "success"
     
@@ -148,6 +146,30 @@ class NoteBook:
             if note.title.value.lower() == title.lower():
                 self.notes.remove(note)
                 return "Note deleted.", "success"
+
+    @input_error
+    def edit_note(self, title, new_text):
+        new_note = NoteText(new_text)
+        for note in self.notes:
+            if note.title.value.lower() == title.lower():
+                if new_note.value is not None:
+                    note.text = new_note
+                    note.updated_date = dtdt.now().replace(microsecond=0)
+                    return "Note edited.", "success"
+                
+    @input_error
+    def show_all_notes(self):
+        note_list = [str(note) for note in self.notes]
+        return note_list
+    
+    @input_error
+    def search_notes(self, keyword: str):
+        notes = []
+        for note in self.notes:
+            if keyword.lower() in note.title.value.lower() or keyword.lower() in note.text.value.lower():
+                notes.append(note)
+        return [str(note) for note in notes]
+
 
 
 class AddressBook(UserDict):
