@@ -1,26 +1,28 @@
 import pickle
+import os
 
 from colorama import Fore, Style
 
 from utils import input_error
 from models import Name, Phone, Birthday
 from record import AddressBook, Record
+from ui_helpers import user_input, user_output
 
 
 def output(message: str, mtype: str):
     if mtype == 'success':
-        print(Fore.GREEN + message + Style.RESET_ALL)
+        user_output(Fore.GREEN + message + Style.RESET_ALL)
     elif mtype == 'warning':
-        print(Fore.YELLOW + message + Style.RESET_ALL)
+        user_output(Fore.YELLOW + message + Style.RESET_ALL)
     elif mtype == 'error':
-        print(Fore.RED + message + Style.RESET_ALL)
+        user_output(Fore.RED + message + Style.RESET_ALL)
     elif mtype == 'common list':
         for m in message:
-            print(Fore.BLUE + m + Style.RESET_ALL)
+            user_output(Fore.BLUE + m + Style.RESET_ALL)
     elif mtype == 'common':
-        print(Fore.BLUE + message + Style.RESET_ALL)
+        user_output(Fore.BLUE + message + Style.RESET_ALL)
     else:
-        print(message)
+        user_output(message)
 
 
 @input_error
@@ -91,6 +93,10 @@ def show_birthday(args, book):
 
 
 def save_data(book, filename="data/addressbook.pkl"):
+    # створює директорію, якщо вона не існує
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+
+    # зберігає файл
     with open(filename, "wb") as f:
         pickle.dump(book, f)
 
@@ -105,17 +111,17 @@ def load_data(filename="data/addressbook.pkl"):
 
 def main():
     book = load_data()
-    print("Welcome to the assistant bot!")
+    user_output("Welcome to the assistant bot!")
     while True:
-        command = input("Write a command: ")
+        command = user_input("Write a command: ")
         command = command.lower().split(' ')
 
         match command[0]:
             case 'exit' | 'close':
-                print("Good bye!")
+                user_output("Good bye!")
                 break
             case 'hello':
-                print("How can I help you?")
+                user_output("How can I help you?")
             case 'add':
                 output(*add_contact(command[1:], book))
             case 'change':
