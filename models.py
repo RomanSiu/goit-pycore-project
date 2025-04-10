@@ -72,3 +72,14 @@ class NoteText(Field):
             self.value = text
         else:
             self.value = None
+
+                      
+class Address(Field):
+    def __init__(self, value):
+        self.value = None
+        self.validate(value)
+
+    @input_error
+    def validate(self, address):
+        if address.isalpha():
+            self.value = address
