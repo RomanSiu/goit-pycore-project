@@ -92,6 +92,7 @@ def show_birthday(args, book):
         return record
 
 
+
 # Створення функції add_note та find_not длф запису та пошуку нотаток за назвою
 @input_error
 def add_note(args, book):
