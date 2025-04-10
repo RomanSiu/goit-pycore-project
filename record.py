@@ -13,7 +13,12 @@ class Record:
         self.birthday = None
 
     def __str__(self):
-        return f"Contact name: {self.name.value}, phones: {'; '.join(str(p.value) for p in self.phones)}"
+        phones = '; '.join(str(p.value) for p in self.phones)
+        if self.birthday:
+            birthday_str = self.birthday.value.strftime('%d.%m.%Y')
+            return f"Contact name: {self.name.value}, phones: {phones}, birthday: {birthday_str}"
+        else:
+            return f"Contact name: {self.name.value}, phones: {phones}"
 
     @input_error
     def add_phone(self, phone):

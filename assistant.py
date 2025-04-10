@@ -7,6 +7,7 @@ from utils import input_error
 from models import Name, Phone, Birthday
 from record import AddressBook, Record
 from ui_helpers import user_input, user_output
+from tableview import show_table
 
 
 def output(message: str, mtype: str):
@@ -62,12 +63,14 @@ def show_phone(args, book):
 
 @input_error
 def show_all(book):
-    phones = []
+    rows = []
     for rec in book.values():
-
-        rec_phones = ", ".join([i.value for i in rec.phones])
-        phones.append(f"{rec.name.value.capitalize()}: {rec_phones}")
-    return phones, "common list"
+        name = rec.name.value.capitalize()
+        phones = "; ".join(p.value for p in rec.phones)
+        birthday = rec.birthday.value.strftime('%d.%m.%Y') if rec.birthday else "-"
+        # ❗ Тепер повертаємо список з трьох колонок
+        rows.append([name, phones, birthday])
+    return rows, "table"
 
 
 @input_error
@@ -139,7 +142,7 @@ def main():
                     days = 7
                 output(*book.get_upcoming_birthdays(days))
             case 'all':
-                output(*show_all(book))
+                show_table(*show_all(book))
             case _:
                 output("Invalid command.", "error")
     save_data(book)
