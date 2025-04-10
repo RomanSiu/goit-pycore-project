@@ -1,11 +1,10 @@
 import pickle
-
 import shlex
 
 from colorama import Fore, Style
 
 from utils import input_error
-from models import Name, Phone, Birthday, NoteText, Title
+from models import Name, Phone, Birthday, NoteText, Title, Address
 from record import AddressBook, Record, NoteBook, Note
 
 
@@ -64,7 +63,6 @@ def show_phone(args, book):
 def show_all(book):
     phones = []
     for rec in book.values():
-
         rec_phones = ", ".join([i.value for i in rec.phones])
         phones.append(f"{rec.name.value.capitalize()}: {rec_phones}")
     return phones, "common list"
@@ -105,6 +103,7 @@ def add_note(args, book):
         message = "Note with this title already exists. Change the title", "warning"
     return message
 
+
 @input_error
 def find_note(title, book):
     note = book.find_note(title)
@@ -113,6 +112,17 @@ def find_note(title, book):
     else:
         message = "Note with this title doesn't exists.", "warning"
     return message
+
+  
+@input_error
+def address(args: list, book: AddressBook, func: str) -> tuple:
+    record = book.find(args[0])
+    if type(record) is not tuple:
+        address_func = getattr(record, func)
+        return address_func(*args[1:])
+    else:
+        return record
+
 
 # Серіалізація даних в окремий файл з обох книг
 def save_data(books, filename="data/addressbook_and_notebook.pkl"):
@@ -129,16 +139,12 @@ def load_data(filename="data/addressbook_and_notebook.pkl"):
         return AddressBook(), NoteBook()
 
 
-# В main() я додаю необхідні команди для додавання та пошуку нотаток, 
-# виправила command, оскільки при старому варіанті він розділятиме усі слова у нотатці 
-# замість прийняття тексту в лапках, як одного з параметрів
 def main():
     addressbook, notebook = load_data()
     print("Welcome to the assistant bot!")
     while True:
         command = shlex.split(input("Write a command: "))
         command[0] = command[0].lower()
-        # command = command.lower().split(' ')
 
         match command[0]:
             case 'exit' | 'close':
@@ -152,6 +158,14 @@ def main():
                 output(*change_contact(command[1:], addressbook))
             case 'phone':
                 output(*show_phone(command[1:], addressbook))
+            case 'add-address':
+                output(*address(command[1:], addressbook, "add_address"))
+            case 'show-address':
+                output(*address(command[1:], addressbook, "show_address"))
+            case 'change-address':
+                output(*address(command[1:], addressbook, "edit_address"))
+            case 'delete-address':
+                output(*address(command[1:], addressbook, "delete_address"))
             case 'add-birthday':
                 output(*add_birthday(command[1:], addressbook))
             case 'show-birthday':
