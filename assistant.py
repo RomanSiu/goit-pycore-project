@@ -91,7 +91,7 @@ def show_birthday(args, book: AddressBook):
 
 
 
-# Створення функції add_note та find_not длф запису та пошуку нотаток за назвою
+# Створення функції add_note та find_not для запису та пошуку нотаток за назвою
 @input_error
 def interactive_add_note(book: NoteBook):
     title = input("Write the title of the note:\n>  ")
@@ -148,6 +148,7 @@ def show_all_notes(book):
 @input_error
 def search_notes(args, book):
     keyword = args[0]
+    tags = []
     if not keyword.strip():
         return "Please, enter a keyword.", "warning"
     message = book.search_notes(keyword)
