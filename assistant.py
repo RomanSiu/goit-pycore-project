@@ -5,7 +5,7 @@ import shlex
 from colorama import Fore, Style
 
 from utils import input_error
-from models import Name, Phone, Birthday, NoteText, Title, Address
+from models import Name, Phone, Birthday, Address, Email, NoteText, Title
 from record import AddressBook, Record, NoteBook, Note
 from ui_helpers import user_input, user_output
 from tableview import show_table
@@ -196,6 +196,42 @@ def address(args: list, book: AddressBook, func: str) -> tuple:
         return address_func(*args[1:])
     else:
         return record
+    
+
+@input_error
+def add_email(args, book):
+    name, email = args
+    record = book.find(name)
+    if record:
+        return record.add_email(email)
+    return "Contact not found.", "warning"
+
+
+@input_error
+def edit_email(args, book):
+    name, new_email = args
+    record = book.find(name)
+    if record:
+        return record.edit_email(new_email)
+    return "Contact not found.", "warning"
+
+
+@input_error
+def show_email(args, book):
+    name = args[0]
+    record = book.find(name)
+    if record:
+        return record.show_email()
+    return "Contact not found.", "warning"
+
+
+@input_error
+def delete_email(args, book):
+    name = args[0]
+    record = book.find(name)
+    if record:
+        return record.delete_email()
+    return "Contact not found.", "warning"
 
 
 # Серіалізація даних в окремий файл з обох книг
@@ -242,7 +278,15 @@ def main():
             case 'change-address':
                 output(*address(command[1:], addressbook, "edit_address"))
             case 'delete-address':
-                output(*address(command[1:], addressbook, "delete_address"))
+              output(*address(command[1:], addressbook, "delete_address"))
+            case 'add-email':
+                output(*add_email(command[1:], addressbook))
+            case 'change-email':
+                output(*edit_email(command[1:], addressbook))
+            case 'show-email':
+                output(*show_email(command[1:], addressbook))
+            case 'delete-email':
+                output(*delete_email(command[1:], addressbook))
             case 'add-birthday':
                 output(*add_birthday(command[1:], addressbook))
             case 'show-birthday':

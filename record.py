@@ -3,7 +3,7 @@ from datetime import timedelta
 from collections import UserDict
 
 from utils import input_error
-from models import Name, Phone, Birthday, NoteText, Title, Address
+from models import Name, Phone, Birthday, Address, Email, NoteText, Title
 
 
 class Record:
@@ -12,6 +12,7 @@ class Record:
         self.phones = []
         self.birthday = None
         self.address = None
+        self.email = None
 
     def __str__(self):
         birthday_str = ""
@@ -185,6 +186,37 @@ class NoteBook:
             if note.title.value.lower() == title.lower():
                 self.notes.remove(note)
                 return "Note deleted.", "success"
+
+    @input_error
+    def add_email(self, email):
+        email = Email(email)
+        if email.value is None:
+            return "Please enter a valid email address (only Latin letters and must include @).", "warning"
+        self.email = email
+        return "Email added.", "success"
+
+    @input_error
+    def edit_email(self, new_email):
+        email = Email(new_email)
+        if email.value is None:
+            return "Please enter a valid email address (only Latin letters and must include @).", "warning"
+        if self.email is None:
+            return "No email found.", "warning"
+        self.email = email
+        return "Email changed.", "success"
+
+    @input_error
+    def delete_email(self):
+        if self.email is None or self.email.value is None:
+            return "No email found to delete.", "warning"
+        self.email = None
+        return "Email deleted.", "success"
+
+    @input_error
+    def show_email(self):
+        if self.email is None or self.email.value is None:
+            return "No email found.", "warning"
+        return f"{self.name.value.capitalize()}'s email: {self.email.value}", "common"   
 
 
 class AddressBook(UserDict):
