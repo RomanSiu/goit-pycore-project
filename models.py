@@ -60,7 +60,7 @@ class Address(Field):
         else:
             self.value = None
 
-# email
+
 class Email(Field):
     def __init__(self, value):
         super().__init__(value)
@@ -69,7 +69,7 @@ class Email(Field):
     @input_error
     def validate(self, email):
         if "@" in email and email.replace("@", "").replace(".", "").isalnum() and email.isascii():
-            self.value = email.lower()
+            self.value = email
         else:
             self.value = None
             return "Please enter a valid email address (only Latin letters and must include @).", "warning"

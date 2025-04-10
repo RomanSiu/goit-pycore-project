@@ -3,7 +3,7 @@ import pickle
 from colorama import Fore, Style
 
 from utils import input_error
-from models import Name, Phone, Birthday, Address
+from models import Name, Phone, Birthday, Address, Email
 from record import AddressBook, Record
 
 
@@ -98,7 +98,7 @@ def address(args: list, book: AddressBook, func: str) -> tuple:
     else:
         return record
     
-# email
+
 @input_error
 def add_email(args, book):
     name, email = args
@@ -106,6 +106,7 @@ def add_email(args, book):
     if record:
         return record.add_email(email)
     return "Contact not found.", "warning"
+
 
 @input_error
 def edit_email(args, book):
@@ -115,6 +116,7 @@ def edit_email(args, book):
         return record.edit_email(new_email)
     return "Contact not found.", "warning"
 
+
 @input_error
 def show_email(args, book):
     name = args[0]
@@ -123,6 +125,7 @@ def show_email(args, book):
         return record.show_email()
     return "Contact not found.", "warning"
 
+
 @input_error
 def delete_email(args, book):
     name = args[0]
@@ -130,8 +133,6 @@ def delete_email(args, book):
     if record:
         return record.delete_email()
     return "Contact not found.", "warning"
-
-# stop email
 
 
 def save_data(book, filename="data/addressbook.pkl"):
@@ -174,6 +175,14 @@ def main():
                 output(*address(command[1:], book, "edit_address"))
             case 'delete-address':
                 output(*address(command[1:], book, "delete_address"))
+            case 'add-email':
+                output(*add_email(command[1:], book))
+            case 'change-email':
+                output(*edit_email(command[1:], book))
+            case 'show-email':
+                output(*show_email(command[1:], book))
+            case 'delete-email':
+                output(*delete_email(command[1:], book))
             case 'add-birthday':
                 output(*add_birthday(command[1:], book))
             case 'show-birthday':
