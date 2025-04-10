@@ -1,4 +1,5 @@
 import pickle
+import os
 import shlex
 
 from colorama import Fore, Style
@@ -6,22 +7,24 @@ from colorama import Fore, Style
 from utils import input_error
 from models import Name, Phone, Birthday, NoteText, Title, Address
 from record import AddressBook, Record, NoteBook, Note
+from ui_helpers import user_input, user_output
+from tableview import show_table
 
 
 def output(message: str, mtype: str):
     if mtype == 'success':
-        print(Fore.GREEN + message + Style.RESET_ALL)
+        user_output(Fore.GREEN + message + Style.RESET_ALL)
     elif mtype == 'warning':
-        print(Fore.YELLOW + message + Style.RESET_ALL)
+        user_output(Fore.YELLOW + message + Style.RESET_ALL)
     elif mtype == 'error':
-        print(Fore.RED + message + Style.RESET_ALL)
+        user_output(Fore.RED + message + Style.RESET_ALL)
     elif mtype == 'common list':
         for m in message:
-            print(Fore.BLUE + m + Style.RESET_ALL)
+            user_output(Fore.BLUE + m + Style.RESET_ALL)
     elif mtype == 'common':
-        print(Fore.BLUE + message + Style.RESET_ALL)
+        user_output(Fore.BLUE + message + Style.RESET_ALL)
     else:
-        print(message)
+        user_output(message)
 
 
 @input_error
@@ -100,11 +103,14 @@ def show_all(book: AddressBook) -> tuple:
     Returns:
         tuple: Tuple with list of contacts or with message.
     """
-    phones = []
+    rows = []
     for rec in book.values():
-        rec_phones = ", ".join([i.value for i in rec.phones])
-        phones.append(f"{rec.name.value.capitalize()}: {rec_phones}")
-    return phones, "common list"
+        name = rec.name.value.capitalize()
+        phones = "; ".join(p.value for p in rec.phones)
+        birthday = rec.birthday.value.strftime('%d.%m.%Y') if rec.birthday else "-"
+        # ❗ Тепер повертаємо список з трьох колонок
+        rows.append([name, phones, birthday])
+    return rows, "table"
 
 
 @input_error
@@ -194,6 +200,8 @@ def address(args: list, book: AddressBook, func: str) -> tuple:
 
 # Серіалізація даних в окремий файл з обох книг
 def save_data(books, filename="data/addressbook_and_notebook.pkl"):
+    # створює директорію, якщо вона не існує
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
     with open(filename, "wb") as f:
         pickle.dump(books, f)
 
@@ -209,17 +217,18 @@ def load_data(filename="data/addressbook_and_notebook.pkl"):
 
 def main():
     addressbook, notebook = load_data()
-    print("Welcome to the assistant bot!")
+    user_output("Welcome to the assistant bot!")
     while True:
         command = shlex.split(input("Write a command: "))
         command[0] = command[0].lower()
 
+
         match command[0]:
             case 'exit' | 'close':
-                print("Good bye!")
+                user_output("Good bye!")
                 break
             case 'hello':
-                print("How can I help you?")
+                user_output("How can I help you?")
             case 'add':
                 output(*add_contact(command[1:], addressbook))
             case 'change':
@@ -249,7 +258,7 @@ def main():
             case 'find-note':
                 output(*find_note(command[1], notebook))
             case 'all':
-                output(*show_all(addressbook))
+                show_table(*show_all(addressbook))
             case _:
                 output("Invalid command.", "error")
     save_data((addressbook, notebook))
