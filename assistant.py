@@ -97,6 +97,41 @@ def address(args: list, book: AddressBook, func: str) -> tuple:
         return address_func(*args[1:])
     else:
         return record
+    
+# email
+@input_error
+def add_email(args, book):
+    name, email = args
+    record = book.find(name)
+    if record:
+        return record.add_email(email)
+    return "Contact not found.", "warning"
+
+@input_error
+def edit_email(args, book):
+    name, new_email = args
+    record = book.find(name)
+    if record:
+        return record.edit_email(new_email)
+    return "Contact not found.", "warning"
+
+@input_error
+def show_email(args, book):
+    name = args[0]
+    record = book.find(name)
+    if record:
+        return record.show_email()
+    return "Contact not found.", "warning"
+
+@input_error
+def delete_email(args, book):
+    name = args[0]
+    record = book.find(name)
+    if record:
+        return record.delete_email()
+    return "Contact not found.", "warning"
+
+# stop email
 
 
 def save_data(book, filename="data/addressbook.pkl"):
