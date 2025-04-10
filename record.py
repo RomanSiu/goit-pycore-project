@@ -24,7 +24,16 @@ class Record:
                 + birthday_str + address_str)
 
     @input_error
-    def add_phone(self, phone):
+    def add_phone(self, phone: str) -> tuple:
+        """
+        Add a phone to the record
+
+        Args:
+            phone (str): phone number
+
+        Returns:
+            tuple: message
+        """
         phone = Phone(phone)
         if phone.value is None:
             return "Please enter a valid phone number.", "warning"
@@ -35,7 +44,16 @@ class Record:
             return "Phone already exists.", "warning"
 
     @input_error
-    def remove_phone(self, phone_rm):
+    def remove_phone(self, phone_rm: str) -> tuple:
+        """
+        Remove a phone from the record
+
+        Args:
+            phone_rm (str): phone number to remove
+
+        Returns:
+            tuple: message
+        """
         for phone in self.phones:
             if phone_rm == phone.value:
                 self.phones.remove(phone)
@@ -44,7 +62,17 @@ class Record:
         return "No such phone exists.", "warning"
 
     @input_error
-    def edit_phone(self, old_phone, new_phone):
+    def edit_phone(self, old_phone: str, new_phone: str) -> tuple:
+        """
+        Edit a phone in the record
+
+        Args:
+            old_phone (str): phone number to edit
+            new_phone (str): new phone number
+
+        Returns:
+            tuple: message
+        """
         new_phone = Phone(new_phone)
 
         if new_phone.value is None:
@@ -58,7 +86,16 @@ class Record:
         return "No such phone exists.", "warning"
 
     @input_error
-    def find_phone(self, phone_to_find):
+    def find_phone(self, phone_to_find: str) -> tuple:
+        """
+        Find a phone in the record
+
+        Args:
+             phone_to_find (str): phone number to find
+
+        Returns:
+            tuple: message
+        """
         for phone in self.phones:
             if phone_to_find == phone.value:
                 return phone

@@ -25,7 +25,17 @@ def output(message: str, mtype: str):
 
 
 @input_error
-def add_contact(args, book):
+def add_contact(args: list, book: AddressBook) -> tuple:
+    """
+    Add a contact to the book.
+
+    Args:
+        args (list): Argument list from command line.
+        book (AddressBook): Address book to save records.
+
+    Returns:
+        tuple: Message.
+    """
     name, phone, *_ = args
     record = book.find(name)
     if type(record) is tuple:
@@ -38,7 +48,17 @@ def add_contact(args, book):
 
 
 @input_error
-def change_contact(args, book):
+def change_contact(args: list, book: AddressBook) -> tuple:
+    """
+    Change phone number to the contact.
+
+    Args:
+        args (list): Argument list from command line.
+        book (AddressBook): Address book to save records.
+
+    Returns:
+        tuple: Message.
+    """
     name, old_phone, new_phone, *_ = args
     record = book.find(name)
     if type(record) is not tuple:
@@ -49,7 +69,17 @@ def change_contact(args, book):
 
 
 @input_error
-def show_phone(args, book):
+def show_phone(args: list, book: AddressBook) -> tuple:
+    """
+    Return list of phone numbers for a contact.
+
+    Args:
+        args (list): Argument list from command line.
+        book (AddressBook): Address book to save records.
+
+    Returns:
+        tuple: Tuple with list of phones or with message.
+    """
     name, *_ = args
     record = book.find(name)
     if type(record) is not tuple:
@@ -60,7 +90,16 @@ def show_phone(args, book):
 
 
 @input_error
-def show_all(book):
+def show_all(book: AddressBook) -> tuple:
+    """
+    Return list of all contacts.
+
+    Args:
+        book (AddressBook): Address book to save records.
+
+    Returns:
+        tuple: Tuple with list of contacts or with message.
+    """
     phones = []
     for rec in book.values():
         rec_phones = ", ".join([i.value for i in rec.phones])
@@ -69,7 +108,17 @@ def show_all(book):
 
 
 @input_error
-def add_birthday(args, book):
+def add_birthday(args: list, book: AddressBook) -> tuple:
+    """
+    Add birthday to contact.
+
+    Args:
+        args (list): Argument list from command line.
+        book (AddressBook): Address book to save records.
+
+    Returns:
+        tuple: Message.
+    """
     name, birthday, *_ = args
     record = book.find(name)
     if type(record) is not tuple:
@@ -80,7 +129,17 @@ def add_birthday(args, book):
 
 
 @input_error
-def show_birthday(args, book):
+def show_birthday(args: list, book: AddressBook) -> tuple:
+    """
+    Show birthday of a contact.
+
+    Args:
+        args (list): Argument list from command line.
+        book (AddressBook): Address book to save records.
+
+    Returns:
+        tuple: Tuple with contacts birthday or with message.
+    """
     name, *_ = args
     record = book.find(name)
     if type(record) is not tuple:
@@ -114,6 +173,17 @@ def find_note(title, book):
   
 @input_error
 def address(args: list, book: AddressBook, func: str) -> tuple:
+    """
+    Call func to interact with an address of a contact.
+
+    Args:
+        args (list): Argument list from command line.
+        book (AddressBook): Address book to save records.
+        func (str): Function to call to interact with an address.
+
+    Returns:
+        tuple: Tuple with address or with message.
+    """
     record = book.find(args[0])
     if type(record) is not tuple:
         address_func = getattr(record, func)
