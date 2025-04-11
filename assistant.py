@@ -392,6 +392,53 @@ def delete_email(args, book):
     return "Contact not found.", "warning"
 
 
+def show_help():
+    sections = {
+        "🤖 Загальне": [
+            "hello                 - Привітання з ботом",
+            "help                  - Показати всі доступні команди",
+            "exit / close          - Вихід з бота"
+        ],
+        "📞 Контакти": [
+            "add-contact           - Додати контакт",
+            "change-contact        - Змінити номер телефону контакту",
+            "show-phone            - Показати телефон контакту",
+            "show-all              - Показати всі контакти"
+        ],
+        "📍 Адреса": [
+            "add-address           - Додати адресу контакту",
+            "show-address          - Показати адресу контакту",
+            "change-address        - Змінити адресу контакту",
+            "delete-address        - Видалити адресу контакту"
+        ],
+        "✉️ Email": [
+            "add-email             - Додати email контакту",
+            "change-email          - Змінити email контакту",
+            "show-email            - Показати email контакту",
+            "delete-email          - Видалити email контакту"
+        ],
+        "🎂 День народження": [
+            "add-birthday          - Додати день народження",
+            "show-birthday         - Показати день народження",
+            "upcoming-birthdays    - Показати дні народження на найближчі дні"
+        ],
+        "📝 Нотатки": [
+            "add-note              - Додати нотатку",
+            "find-note             - Знайти нотатку за назвою",
+            "edit-note             - Редагувати нотатку",
+            "delete-note           - Видалити нотатку",
+            "show-all-notes        - Показати всі нотатки",
+            "search-notes          - Пошук по нотатках за ключовим словом",
+            "import-note           - Імпортувати нотатку з файлу",
+            "clear-all-notes       - Видалити всі нотатки"
+        ]
+    }
+
+    for section, cmds in sections.items():
+        user_output(f"\n{section}", "info")
+        for cmd in cmds:
+            user_output(cmd, "info")
+
 # Серіалізація даних в окремий файл з обох книг
 def save_data(books, filename="data/addressbook_and_notebook.pkl"):
     # створює директорію, якщо вона не існує
@@ -425,13 +472,13 @@ def main():
                 break
             case 'hello':
                 user_output("How can I help you?")
-            case 'add':
+            case 'add-contact':
                 output(*add_contact(command[1:], addressbook))
-            case 'change':
+            case 'change-contact':
                 output(*change_contact(command[1:], addressbook))
-            case 'phone':
+            case 'show-phone':
                 output(*show_phone(command[1:], addressbook))
-            case 'delete':
+            case 'delete-contact':
                 output(*delete_contact(command[1:], addressbook))
             case 'add-address':
                 output(*address(command[1:], addressbook, "add_address"))
@@ -453,7 +500,7 @@ def main():
                 output(*add_birthday(command[1:], addressbook))
             case 'show-birthday':
                 output(*show_birthday(command[1:], addressbook))
-            case 'birthdays':
+            case 'upcoming-birthdays':
                 try:
                     days = int(command[1])
                 except IndexError:
@@ -475,7 +522,9 @@ def main():
                 output(*import_note(notebook))
             case 'clear-all-notes':
                 output(*clear_all_notes(notebook))
-            case 'all':
+            case 'help':
+                show_help()
+            case 'show-all':
                 show_table(*show_all(addressbook))
             case _:
                 output("Invalid command.", "error")
