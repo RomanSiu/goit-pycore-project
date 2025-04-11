@@ -15,17 +15,21 @@ def show_table(message, mtype=None):
         table.field_names = [
             f"{Fore.CYAN}👤 Name{Style.RESET_ALL}", 
             f"{Fore.CYAN}📞 Phone(s){Style.RESET_ALL}",
-            f"{Fore.CYAN}🎂 Birthday{Style.RESET_ALL}"
+            f"{Fore.CYAN}🎂 Birthday{Style.RESET_ALL}",
+            f"{Fore.CYAN}📧 Email{Style.RESET_ALL}",
+            f"{Fore.CYAN}🏠 Address{Style.RESET_ALL}"
         ]
 
         for row in message:
-            if isinstance(row, list) and len(row) == 3:
-                name, phones, birthday = row
+            if isinstance(row, list) and len(row) == 5:
+                name, phones, birthday, email, address = row
             else:
-                name, phones, birthday = "-", "-", "-"
+                name, phones, birthday, email, address = "-", "-", "-", "-", "-"
             table.add_row([
                 f"{Fore.GREEN}{name}{Style.RESET_ALL}",
                 f"{Fore.YELLOW}{phones}{Style.RESET_ALL}",
-                f"{Fore.MAGENTA}{birthday}{Style.RESET_ALL}"
+                f"{Fore.MAGENTA}{birthday}{Style.RESET_ALL}",
+                f"{Fore.BLUE}{email}{Style.RESET_ALL}",
+                f"{Fore.WHITE}{address}{Style.RESET_ALL}"
             ])
     print(table)

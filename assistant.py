@@ -109,8 +109,9 @@ def show_all(book: AddressBook) -> tuple:
         name = rec.name.value.capitalize()
         phones = "; ".join(p.value for p in rec.phones)
         birthday = rec.birthday.value.strftime('%d.%m.%Y') if rec.birthday else "-"
-        # ❗ Тепер повертаємо список з трьох колонок
-        rows.append([name, phones, birthday])
+        email = rec.email.value if rec.email else "-"
+        address = rec.address.value if rec.address else "-"
+        rows.append([name, phones, birthday, email, address])
     return rows, "table"
 
 
