@@ -39,6 +39,10 @@ def add_contact(args: list, book: AddressBook) -> tuple:
     Returns:
         tuple: Message.
     """
+    name = user_input("")
+    name_obj = Name(name)
+    if name_obj.value is None:
+        return "Invalid number", "success"
     name, phone, *_ = args
     record = book.find(name)
     if type(record) is tuple:
@@ -178,16 +182,21 @@ def add_note(book: NoteBook):
         tuple: Success or warning message.
     """
     title = user_input("Write the title of the note:\n>  ")
-    title_obj = Title(title)
-    if title_obj.value is None:
-        return "Title must be 15 characters or less.", "warning"
+    note = Note()
+    message = note.add_title(title)
+    if message:
+        return message
+    # message = book.add_title(title)
+    # output(*message)
+    # title_obj = Title(title)
+    # if title_obj.value is None:
+    #     return "Title must be 15 characters or less.", "warning"
 
     text = user_input("Write the text of the note:\n>  ")
     note = book.find_note(title)
     if note:
         return "Note with this title already exists. Change the title", "warning"
 
-    note = Note(title, text)
     return book.add_note(note)
 
 

@@ -178,9 +178,9 @@ class Record:
     
 
 class Note:
-    def __init__(self, title, text):
-        self.title = Title(title)
-        self.text = NoteText(text)
+    def __init__(self):
+        self.title = None
+        self.text = None
         self.created_date = dtdt.now().replace(microsecond=0)
         self.updated_date = dtdt.now().replace(microsecond=0)
     
@@ -189,13 +189,23 @@ class Note:
                 f"Content: {self.text.value}\n"
                 f"Created: {self.created_date}\n"
                 f"Updated: {self.updated_date}\n")
+    
+    def add_title(self, title):
+        title = Title(title)
+        if title.value is None:
+            return "Invalid title.", "warning"
+        
+    def add_text(self, text):
+        if text.value is None:
+            "Text cannot be empty.", "warning"
+
 
 
 class NoteBook:
     def __init__(self):
         super().__init__()
         self.notes = []
-
+    
     @input_error
     def add_note(self, note: Note) -> tuple:
         """

@@ -11,3 +11,5 @@ def input_error(func):
         except ValueError:
             return "Invalid command.", "error"
     return inner
+
+# + декоратор на raise
