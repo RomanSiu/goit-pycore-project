@@ -186,37 +186,36 @@ class NoteBook:
             if note.title.value.lower() == title.lower():
                 self.notes.remove(note)
                 return "Note deleted.", "success"
+            
+    @input_error
+    def edit_note(self, title, new_text):
+        for note in self.notes:
+            if note.title.value.lower() == title.lower():
+                txt = NoteText(new_text)
+                if txt.value is None:
+                    return "Note cannot be empty.", "warning"
+                else:
+                    note.text = txt
+                    note.updated_date = dtdt.now().replace(microsecond=0)
+                    return "Note edited.", "success"
+    
+    @input_error
+    def search_notes(self, keyword: str):
+        notes = []
+        for note in self.notes:
+            if keyword.lower() in note.title.value.lower() or keyword.lower() in note.text.value.lower():
+                notes.append(note)
+        return [str(note) for note in notes]
 
     @input_error
-    def add_address(self, address: str, *args) -> tuple:
-        address = Address(address)
-        if address.value is None:
-            return "Please enter a valid address.", "warning"
-        else:
-            self.address = address
-            return "Address added.", "success"
-
+    def show_all_notes(self):
+        note_list = [str(note) for note in self.notes]
+        return note_list
+    
     @input_error
-    def show_address(self, *args) -> tuple:
-        if self.address is None:
-            return "No address found.", "warning"
-        return self.address.value, "common"
-
-    @input_error
-    def edit_address(self, address: str, *args) -> tuple:
-        address = Address(address)
-        if self.address is None:
-            return "No address found.", "warning"
-        elif address.value is None:
-            return "Please enter a valid address.", "warning"
-        else:
-            self.address = address
-            return "Address changed.", "success"
-
-    @input_error
-    def delete_address(self, *args) -> tuple:
-        self.address = None
-        return "Address deleted.", "success"
+    def clear_all_notes(self):
+        self.notes.clear()
+        return "All the notes have been deleted.", "success"
 
 
 class AddressBook(UserDict):

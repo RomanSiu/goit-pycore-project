@@ -106,71 +106,163 @@ def show_birthday(args, book):
 
 
 
-# Створення функції add_note та find_not для запису та пошуку нотаток за назвою
 @input_error
-def interactive_add_note(book: NoteBook):
-    title = input("Write the title of the note:\n>  ")
+def add_note(book: NoteBook):
+    """
+    Add a new note with title and text.
+
+    Args:
+        book (NoteBook): NoteBook object to store the note.
+
+    Returns:
+        tuple: Success or warning message.
+    """
+    title = user_input("Write the title of the note:\n>  ")
     title_obj = Title(title)
     if title_obj.value is None:
-        return output("Title must be 15 characters or less.", "warning")
-    text = input("Write the text of the note:\n>  ")
-    note = book.find_note(title)
-    if not isinstance(note, Note):
-        note = Note(title, text)
-        message = book.add_note(note)
-    else:
-        message = "Note with this title already exists. Change the title", "warning"
-    output(*message)
+        return "Title must be 15 characters or less.", "warning"
 
+    text = user_input("Write the text of the note:\n>  ")
+    note = book.find_note(title)
+    if note:
+        return "Note with this title already exists. Change the title", "warning"
+
+    note = Note(title, text)
+    return book.add_note(note)
 
 @input_error
-def find_note(args, book: NoteBook):
-    title = args[0]
+def find_note(book: NoteBook):
+    """
+    Find a note by title.
+
+    Args:
+        book (NoteBook): NoteBook to search in.
+
+    Returns:
+        tuple: Note content if found, otherwise warning message.
+    """
+    title = user_input("Enter the title of the note to find:\n>  ")
     note = book.find_note(title)
     if isinstance(note, Note):
-        message = str(note), "common"
-    else:
-        message = "Note with this title doesn't exists.", "warning"
-    return message
+        return str(note), "common"
+    return "Note with this title doesn't exist.", "warning"
 
 @input_error
-def interactive_edit_note(book: NoteBook):
-    title = input("Write the title of the note to edit:\n>  ")
+def edit_note(book: NoteBook):
+    """
+    Edit an existing note.
+
+    Args:
+        book (NoteBook): NoteBook object containing notes.
+
+    Returns:
+        tuple: Success message or warning if not found or empty.
+    """
+    title = user_input("Write the title of the note to edit:\n>  ")
     note = book.find_note(title)
     if not note:
-        return output("Note with this title doesn't exists.", "warning")
-    new_text = input("Write the new text for the note:\n>  ")
-    message = book.edit_note(title, new_text)
-    return output(*message)
+        return "Note with this title doesn't exist.", "warning"
+
+    new_text = user_input("Write the new text for the note:\n>  ")
+    return book.edit_note(title, new_text)
 
 @input_error
-def delete_note(args, book: NoteBook):
-    title = args[0]
+def delete_note(book: NoteBook):
+    """
+    Delete a note by title.
+
+    Args:
+        book (NoteBook): NoteBook containing the note.
+
+    Returns:
+        tuple: Success message or warning if not found.
+    """
+    title = user_input("Write the title of the note to delete:\n>  ")
     if not title.strip():
         return "Note title cannot be empty.", "warning"
+
     message = book.delete_note(title)
     if message is None:
         return "Note not found.", "warning"
+
     return message
 
 @input_error
-def show_all_notes(book):
+def show_all_notes(book: NoteBook):
+    """
+    Display all notes in the NoteBook.
+
+    Args:
+        book (NoteBook): NoteBook containing the notes.
+
+    Returns:
+        tuple: List of all notes or a warning if none exist.
+    """
     notes = book.show_all_notes()
     if not notes:
         return "No notes found.", "warning"
+
     return notes, "common list"
 
 @input_error
-def search_notes(args, book):
-    keyword = args[0]
-    tags = []
+def search_notes(book: NoteBook):
+    """
+    Search notes by keyword in title or text.
+
+    Args:
+        book (NoteBook): NoteBook to search in.
+
+    Returns:
+        tuple: List of matched notes or warning if nothing found.
+    """
+    keyword = user_input("Enter keyword to search in notes:\n>  ")
     if not keyword.strip():
         return "Please, enter a keyword.", "warning"
-    message = book.search_notes(keyword)
-    if not message:
-        return "No matches found.", "warning"
-    return ["The results of the search:"] + message, "common list"
 
+    result = book.search_notes(keyword)
+    if not result:
+        return "No matches found.", "warning"
+
+    results = ["The results of the search:"] + result
+    return results, "common list"
+
+@input_error
+def import_note(book: NoteBook):
+    """
+    Import a note from a text file.
+
+    Args:
+        book (NoteBook): NoteBook to add the imported note to.
+
+    Returns:
+        tuple: Success message or error if the file is invalid.
+    """
+    file_path = user_input("Enter file path to import note:\n>  ")
+    if not os.path.exists(file_path):
+        return "File not found.", "error"
+
+    title, _ = os.path.splitext(os.path.basename(file_path))
+    with open(file_path, "r", encoding="utf-8") as f:
+        text = f.read()
+
+    note = Note(title, text)
+    return book.add_note(note)
+
+@input_error
+def clear_all_notes(book: NoteBook):
+    """
+    Clear all notes from the NoteBook.
+
+    Args:
+        book (NoteBook): NoteBook to clear.
+
+    Returns:
+        tuple: Success or warning message if no notes exist.
+    """
+    if not book.notes:
+        return "There are no notes to delete.", "warning"
+
+    return book.clear_all_notes()
 
 
 @input_error
@@ -230,7 +322,6 @@ def delete_email(args, book):
     return "Contact not found.", "warning"
 
 
-# Серіалізація даних в окремий файл з обох книг
 def save_data(books, filename="data/addressbook_and_notebook.pkl"):
     # створює директорію, якщо вона не існує
     os.makedirs(os.path.dirname(filename), exist_ok=True)
@@ -238,7 +329,6 @@ def save_data(books, filename="data/addressbook_and_notebook.pkl"):
         pickle.dump(books, f)
 
 
-# Завантаження даних з файлу з кортежами обох книг та повернення у разі провало також обох з них
 def load_data(filename="data/addressbook_and_notebook.pkl"):
     try:
         with open(filename, "rb") as f:
@@ -252,6 +342,8 @@ def main():
     user_output("Welcome to the assistant bot!")
     while True:
         command = shlex.split(input("Write a command: "))
+        if not command:
+            continue
         command[0] = command[0].lower()
 
 
@@ -274,7 +366,7 @@ def main():
             case 'change-address':
                 output(*address(command[1:], addressbook, "edit_address"))
             case 'delete-address':
-              output(*address(command[1:], addressbook, "delete_address"))
+                output(*address(command[1:], addressbook, "delete_address"))
             case 'add-email':
                 output(*add_email(command[1:], addressbook))
             case 'change-email':
@@ -294,17 +386,21 @@ def main():
                     days = 7
                 output(*addressbook.get_upcoming_birthdays(days))
             case 'add-note':
-                interactive_add_note(notebook)
+                output(*add_note(notebook))
             case 'find-note':
-                output(*find_note(command[1:], notebook))
+                output(*find_note(notebook))
             case 'edit-note':
-                interactive_edit_note(notebook)
+                output(*edit_note(notebook))
             case 'delete-note':
-                output(*delete_note(command[1:], notebook))
+                output(*delete_note(notebook))
             case 'show-all-notes':
                 output(*show_all_notes(notebook))
             case 'search-notes':
-                output(*search_notes(command[1:], notebook))
+                output(*search_notes(notebook))
+            case 'import-note':
+                output(*import_note(notebook))
+            case 'clear-all-notes':
+                output(*clear_all_notes(notebook))
             case 'all':
                 show_table(*show_all(addressbook))
             case _:
