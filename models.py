@@ -49,6 +49,32 @@ class Birthday(Field):
         self.value = dtdt.strptime(birthday, "%d.%m.%Y").date()
 
 
+class Title(Field):
+    def __init__(self, value):
+        super().__init__(value)
+        self.validated_title(value)
+
+    @input_error
+    def validated_title(self, title):
+        if type(title) is str and len(title) < 15:
+            self.value = title
+        else:
+            self.value = None
+
+
+class NoteText(Field):
+    def __init__(self, value):
+        super().__init__(value)
+        self.validated_notetext(value)
+    
+    @input_error
+    def validated_notetext(self, text):
+        if text is not None and text.strip().strip('"') != "":
+            self.value = text
+        else:
+            self.value = None
+
+                      
 class Address(Field):
     def __init__(self, value):
         self.value = None
@@ -58,10 +84,8 @@ class Address(Field):
     def validate(self, address):
         if address.isalpha():
             self.value = address
-        else:
-            self.value = None
 
-# email - тут змінила перевірку, щоб була через шаблон
+            
 class Email(Field):
     def __init__(self, value):
         super().__init__(value)
@@ -72,6 +96,8 @@ class Email(Field):
         email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         if re.match(email_pattern, email):
             self.value = email.lower()
+        if "@" in email and email.replace("@", "").replace(".", "").isalnum() and email.isascii():
+            self.value = email
         else:
             self.value = None
             return "Please enter a valid email address (only Latin letters and must include @).", "warning"
