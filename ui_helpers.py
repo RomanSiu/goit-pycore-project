@@ -16,23 +16,24 @@ def user_output(message: str, status: str = "info") -> None:
 
     # ui_helpers.py
 
-def ask_yes_no(question: str) -> bool:
-    answer = input(f"{Fore.CYAN}{question} (y/n): {Style.RESET_ALL}").strip().lower()
-    return answer in ["y", "yes"]
+def ask_and_get_value(question: str) -> str | None:
+    print(f"{Fore.CYAN}{question} (Press Enter to skip):{Style.RESET_ALL}")
+    answer = input("> ").strip()
+    return answer if answer else None
 
 def extend_contact_interactive(record, book):
     from assistant import add_birthday, add_email, address  # уникнути циклічного імпорту
 
     name = record.name.value
 
-    if ask_yes_no("Would you like to add a birthday?"):
-        bday = user_input("Enter birthday (DD.MM.YYYY): ")
+    bday = ask_and_get_value("Would you like to add a birthday?")
+    if bday:
         add_birthday([name, bday], book)
 
-    if ask_yes_no("Would you like to add an email?"):
-        email = user_input("Enter email: ")
+    email = ask_and_get_value("Would you like to add an email?")
+    if email:
         add_email([name, email], book)
 
-    if ask_yes_no("Would you like to add an address?"):
-        addr = user_input("Enter address: ")
+    addr = ask_and_get_value("Would you like to add an address?")
+    if addr:
         address([name, addr], book, "add_address")
