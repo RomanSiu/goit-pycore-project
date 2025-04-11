@@ -7,7 +7,7 @@ from colorama import Fore, Style
 from utils import input_error
 from models import Name, Phone, Birthday, Address, Email, NoteText, Title
 from record import AddressBook, Record, NoteBook, Note
-from ui_helpers import user_input, user_output
+from ui_helpers import user_input, user_output, extend_contact_interactive
 from tableview import show_table
 
 
@@ -45,6 +45,7 @@ def add_contact(args: list, book: AddressBook) -> tuple:
         record = Record(name)
         message = record.add_phone(phone)
         book.add_record(record)
+        extend_contact_interactive(record, book)
     else:
         message = record.add_phone(phone)
     return message
