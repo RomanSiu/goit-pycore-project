@@ -32,4 +32,20 @@ def show_table(message, mtype=None):
                 f"{Fore.BLUE}{email}{Style.RESET_ALL}",
                 f"{Fore.WHITE}{address}{Style.RESET_ALL}"
             ])
+    elif mtype == 'birthdays' and isinstance(message, list):
+        table = PrettyTable()
+        table.field_names = [
+            f"{Fore.CYAN}👤 Name{Style.RESET_ALL}",
+            f"{Fore.CYAN}🎉 Congratulation Date{Style.RESET_ALL}"
+        ]
+        for row in message:
+            if isinstance(row, list) and len(row) == 2:
+                name, bday = row
+            else:
+                name, bday = "-", "-"
+            table.add_row([
+                f"{Fore.GREEN}{name}{Style.RESET_ALL}",
+                f"{Fore.MAGENTA}{bday}{Style.RESET_ALL}"
+            ])
+
     print(table)

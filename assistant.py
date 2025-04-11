@@ -179,6 +179,22 @@ def show_birthday(args: list, book: AddressBook) -> tuple:
     else:
         return record
 
+@input_error
+def birthdays_table(book: AddressBook, days: int = 7) -> tuple:
+    data, _ = book.get_upcoming_birthdays(days)
+
+    if len(data) <= 1:
+        return f"No birthdays in the next {days} days.", "warning"
+
+    rows = []
+    for line in data[1:]:  # пропускаємо заголовок
+        try:
+            name, bday = line.split(": ")
+            rows.append([name.strip(), bday.strip()])
+        except ValueError:
+            continue
+
+    return rows, "birthdays"
 
 @input_error
 def add_note(book: NoteBook):
@@ -403,6 +419,54 @@ def delete_email(args, book):
     return "Contact not found.", "warning"
 
 
+def show_help():
+    sections = {
+        "🤖 Загальне": [
+            "hello                 - Привітання з ботом",
+            "help                  - Показати всі доступні команди",
+            "exit / close          - Вихід з бота"
+        ],
+        "📞 Контакти": [
+            "add-contact           - Додати контакт",
+            "change-contact        - Змінити номер телефону контакту",
+            "show-phone            - Показати телефон контакту",
+            "show-all              - Показати всі контакти"
+        ],
+        "📍 Адреса": [
+            "add-address           - Додати адресу контакту",
+            "show-address          - Показати адресу контакту",
+            "change-address        - Змінити адресу контакту",
+            "delete-address        - Видалити адресу контакту"
+        ],
+        "✉️ Email": [
+            "add-email             - Додати email контакту",
+            "change-email          - Змінити email контакту",
+            "show-email            - Показати email контакту",
+            "delete-email          - Видалити email контакту"
+        ],
+        "🎂 День народження": [
+            "add-birthday          - Додати день народження",
+            "show-birthday         - Показати день народження",
+            "upcoming-birthdays    - Показати дні народження на найближчі дні"
+        ],
+        "📝 Нотатки": [
+            "add-note              - Додати нотатку",
+            "find-note             - Знайти нотатку за назвою",
+            "edit-note             - Редагувати нотатку",
+            "delete-note           - Видалити нотатку",
+            "show-all-notes        - Показати всі нотатки",
+            "search-notes          - Пошук по нотатках за ключовим словом",
+            "import-note           - Імпортувати нотатку з файлу",
+            "clear-all-notes       - Видалити всі нотатки"
+        ]
+    }
+
+    for section, cmds in sections.items():
+        user_output(f"\n{section}", "info")
+        for cmd in cmds:
+            user_output(cmd, "info")
+
+
 # Серіалізація даних в окремий файл з обох книг
 def save_data(books, filename="data/addressbook_and_notebook.pkl"):
     # створює директорію, якщо вона не існує
@@ -468,7 +532,7 @@ def main():
                     days = int(command[1])
                 except IndexError:
                     days = 7
-                output(*addressbook.get_upcoming_birthdays(days))
+                show_table(*birthdays_table(addressbook, days))
             case 'add-note':
                 output(*add_note(notebook))
             case 'find-note':
@@ -485,6 +549,8 @@ def main():
                 output(*import_note(notebook))
             case 'clear-all-notes':
                 output(*clear_all_notes(notebook))
+            case 'help':
+                show_help()
             case 'all':
                 show_table(*show_all(addressbook))
             case _:
