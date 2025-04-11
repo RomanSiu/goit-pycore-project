@@ -7,7 +7,7 @@ from colorama import Fore, Style
 from utils import input_error
 from models import Name, Phone, Birthday, Address, Email, NoteText, Title
 from record import AddressBook, Record, NoteBook, Note
-from ui_helpers import user_input, user_output
+from ui_helpers import user_input, user_output, extend_contact_interactive
 from tableview import show_table
 
 
@@ -45,6 +45,7 @@ def add_contact(args: list, book: AddressBook) -> tuple:
         record = Record(name)
         message = record.add_phone(phone)
         book.add_record(record)
+        extend_contact_interactive(record, book)
     else:
         message = record.add_phone(phone)
     return message
@@ -129,8 +130,9 @@ def show_all(book: AddressBook) -> tuple:
         name = rec.name.value.capitalize()
         phones = "; ".join(p.value for p in rec.phones)
         birthday = rec.birthday.value.strftime('%d.%m.%Y') if rec.birthday else "-"
-        # ❗ Тепер повертаємо список з трьох колонок
-        rows.append([name, phones, birthday])
+        email = rec.email.value if rec.email else "-"
+        address = rec.address.value if rec.address else "-"
+        rows.append([name, phones, birthday, email, address])
     return rows, "table"
 
 
