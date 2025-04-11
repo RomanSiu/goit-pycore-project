@@ -3,7 +3,7 @@ from datetime import timedelta
 from collections import UserDict
 
 from utils import input_error
-from models import Name, Phone, Birthday, NoteText, Title, Address
+from models import Name, Phone, Birthday, Address, Email, NoteText, Title
 
 
 class Record:
@@ -12,6 +12,7 @@ class Record:
         self.phones = []
         self.birthday = None
         self.address = None
+        self.email = None
 
     def __str__(self):
         birthday_str = ""
@@ -112,6 +113,37 @@ class Record:
         if self.birthday is None:
             return "No birthday found.", "warning"
         return f"{self.name.value.capitalize()}'s birthday: {dtdt.strftime(self.birthday.value, '%d.%m.%Y')}"
+
+    @input_error
+    def add_address(self, address: str, *args) -> tuple:
+        address = Address(address)
+        if address.value is None:
+            return "Please enter a valid address.", "warning"
+        else:
+            self.address = address
+            return "Address added.", "success"
+
+    @input_error
+    def show_address(self, *args) -> tuple:
+        if self.address is None:
+            return "No address found.", "warning"
+        return self.address.value, "common"
+
+    @input_error
+    def edit_address(self, address: str, *args) -> tuple:
+        address = Address(address)
+        if self.address is None:
+            return "No address found.", "warning"
+        elif address.value is None:
+            return "Please enter a valid address.", "warning"
+        else:
+            self.address = address
+            return "Address changed.", "success"
+
+    @input_error
+    def delete_address(self, *args) -> tuple:
+        self.address = None
+        return "Address deleted.", "success"
     
 
 class Note:
