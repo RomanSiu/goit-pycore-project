@@ -147,10 +147,14 @@ class Record:
 
     @input_error
     def add_email(self, email):
-        email = Email(email)
-        if email.value is None:
-            return "Please enter a valid email address (only Latin letters and must include @).", "warning"
-        self.email = email
+        if hasattr(self, "email") and self.email is not None:
+            return "This contact already has an email.", "warning"
+
+        email_obj = Email(email)
+        if email_obj.value is None:
+            return "Please enter a valid email address.", "warning"
+
+        self.email = email_obj
         return "Email added.", "success"
 
     @input_error
