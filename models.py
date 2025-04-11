@@ -90,18 +90,15 @@ class Email(Field):
     def __init__(self, value):
         super().__init__(value)
         self.validate(value)
-
+    
     @input_error
     def validate(self, email):
         email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         if re.match(email_pattern, email):
             self.value = email.lower()
-        if "@" in email and email.replace("@", "").replace(".", "").isalnum() and email.isascii():
-            self.value = email
         else:
             self.value = None
-            return "Please enter a valid email address (only Latin letters and must include @).", "warning"
-    
+        return "Please enter a valid email address (e.g. example@mail.com).", "warning"
 
     def update(self, new_email):
         self.validate(new_email)
