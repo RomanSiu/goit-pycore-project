@@ -147,7 +147,7 @@ class Record:
 
     @input_error
     def add_email(self, email):
-        if hasattr(self, "email") and self.email is not None: # перевірка якщо поле емеіл вже заповнене
+        if hasattr(self, "email") and self.email is not None:
             return "This contact already has an email.", "warning"
 
         email_obj = Email(email)
