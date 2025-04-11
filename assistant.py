@@ -72,6 +72,17 @@ def change_contact(args: list, book: AddressBook) -> tuple:
 
 
 @input_error
+def delete_contact(args: list, book: AddressBook) -> tuple:
+    name, *_ = args
+    record = book.find(name)
+    if type(record) is not tuple:
+        message = book.delete(name)
+        return message
+    else:
+        return record
+
+
+@input_error
 def show_phone(args: list, book: AddressBook) -> tuple:
     """
     Return list of phone numbers for a contact.
@@ -271,6 +282,8 @@ def main():
                 output(*change_contact(command[1:], addressbook))
             case 'phone':
                 output(*show_phone(command[1:], addressbook))
+            case 'delete':
+                output(*delete_contact(command[1:], addressbook))
             case 'add-address':
                 output(*address(command[1:], addressbook, "add_address"))
             case 'show-address':
