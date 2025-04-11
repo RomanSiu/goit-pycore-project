@@ -179,6 +179,22 @@ def show_birthday(args: list, book: AddressBook) -> tuple:
     else:
         return record
 
+@input_error
+def birthdays_table(book: AddressBook, days: int = 7) -> tuple:
+    data, _ = book.get_upcoming_birthdays(days)
+
+    if len(data) <= 1:
+        return f"No birthdays in the next {days} days.", "warning"
+
+    rows = []
+    for line in data[1:]:  # пропускаємо заголовок
+        try:
+            name, bday = line.split(": ")
+            rows.append([name.strip(), bday.strip()])
+        except ValueError:
+            continue
+
+    return rows, "birthdays"
 
 @input_error
 def add_note(book: NoteBook):
@@ -468,7 +484,7 @@ def main():
                     days = int(command[1])
                 except IndexError:
                     days = 7
-                output(*addressbook.get_upcoming_birthdays(days))
+                show_table(*birthdays_table(addressbook, days))
             case 'add-note':
                 output(*add_note(notebook))
             case 'find-note':
