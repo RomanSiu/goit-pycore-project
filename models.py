@@ -1,8 +1,8 @@
+import re
 from datetime import datetime as dtdt
 
 from utils import input_error
 
-import re
 
 class Field:
     def __init__(self, value):
@@ -82,7 +82,7 @@ class Address(Field):
 
     @input_error
     def validate(self, address):
-        if address.isalpha():
+        if not address.isspace() and len(address) >= 3:
             self.value = address
 
             

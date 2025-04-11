@@ -44,6 +44,8 @@ def add_contact(args: list, book: AddressBook) -> tuple:
     if type(record) is tuple:
         record = Record(name)
         message = record.add_phone(phone)
+        if message[1] in ["warrning", "error"]:
+            return message
         book.add_record(record)
         extend_contact_interactive(record, book)
     else:
@@ -220,6 +222,7 @@ def find_note(book: NoteBook):
         return str(note), "common"
     return "Note with this title doesn't exist.", "warning"
 
+
 @input_error
 def edit_note(book: NoteBook):
     """
@@ -238,6 +241,7 @@ def edit_note(book: NoteBook):
 
     new_text = user_input("Write the new text for the note:\n>  ")
     return book.edit_note(title, new_text)
+
 
 @input_error
 def delete_note(book: NoteBook):
@@ -260,6 +264,7 @@ def delete_note(book: NoteBook):
 
     return message
 
+
 @input_error
 def show_all_notes(book: NoteBook):
     """
@@ -276,6 +281,7 @@ def show_all_notes(book: NoteBook):
         return "No notes found.", "warning"
 
     return notes, "common list"
+
 
 @input_error
 def search_notes(book: NoteBook):
@@ -299,6 +305,7 @@ def search_notes(book: NoteBook):
     results = ["The results of the search:"] + result
     return results, "common list"
 
+
 @input_error
 def import_note(book: NoteBook):
     """
@@ -320,6 +327,7 @@ def import_note(book: NoteBook):
 
     note = Note(title, text)
     return book.add_note(note)
+
 
 @input_error
 def clear_all_notes(book: NoteBook):
@@ -421,7 +429,6 @@ def main():
             continue
         command[0] = command[0].lower()
 
-
         match command[0]:
             case 'exit' | 'close':
                 user_output("Good bye!")
@@ -443,7 +450,7 @@ def main():
             case 'change-address':
                 output(*address(command[1:], addressbook, "edit_address"))
             case 'delete-address':
-              output(*address(command[1:], addressbook, "delete_address"))
+                output(*address(command[1:], addressbook, "delete_address"))
             case 'add-email':
                 output(*add_email(command[1:], addressbook))
             case 'change-email':

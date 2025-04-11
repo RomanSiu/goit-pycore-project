@@ -10,4 +10,6 @@ def input_error(func):
             return "No contact with that name.", "warning"
         except ValueError:
             return "Invalid command.", "error"
+        except TypeError:
+            return "Invalid command.", "error"
     return inner
