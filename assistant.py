@@ -72,6 +72,27 @@ def change_contact(args: list, book: AddressBook) -> tuple:
 
 
 @input_error
+def delete_contact(args: list, book: AddressBook) -> tuple:
+    """
+    Delete a contact from the book.
+
+    Args:
+        args (list): Argument list from command line.
+        book (AddressBook): Address book to save records.
+
+    Returns:
+        tuple: Message.
+    """
+    name, *_ = args
+    record = book.find(name)
+    if type(record) is not tuple:
+        message = book.delete(name)
+        return message
+    else:
+        return record
+
+
+@input_error
 def show_phone(args: list, book: AddressBook) -> tuple:
     """
     Return list of phone numbers for a contact.
