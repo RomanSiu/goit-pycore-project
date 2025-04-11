@@ -166,7 +166,16 @@ class NoteBook:
         self.notes = []
 
     @input_error
-    def add_note(self, note):
+    def add_note(self, note: Note) -> tuple:
+        """
+        Add a new note to the notebook.
+
+        Args:
+            note (Note): Note object containing title and content.
+
+        Returns:
+            tuple: Message and message type indicating success or validation warning.
+        """
         if note.text.value is None:
             return "Note cannot be empty.", "warning"
         elif note.title.value is None:
@@ -175,20 +184,48 @@ class NoteBook:
         return "Note added.", "success"
     
     @input_error
-    def find_note(self, title):
+    def find_note(self, title: str) -> Note | None:
+        """
+        Search for a note by its title.
+
+        Args:
+            title (str): Title of the note to search for.
+
+        Returns:
+            Note | None: Note object if found, otherwise None.
+        """
         for note in self.notes:
             if note.title.value.lower() == title.lower():
                 return note
     
     @input_error
-    def delete_note(self, title):
+    def delete_note(self, title: str) -> tuple | None:
+        """
+        Delete a note by its title.
+
+        Args:
+            title (str): Title of the note to delete.
+
+        Returns:
+            tuple | None: Message indicating success or None if not found.
+        """
         for note in self.notes:
             if note.title.value.lower() == title.lower():
                 self.notes.remove(note)
                 return "Note deleted.", "success"
             
     @input_error
-    def edit_note(self, title, new_text):
+    def edit_note(self, title: str, new_text: str) -> tuple:
+        """
+        Edit the content of a note by its title.
+
+        Args:
+            title (str): Title of the note to edit.
+            new_text (str): New text to update the note content.
+
+        Returns:
+            tuple: Message indicating success or warning if validation fails.
+        """
         for note in self.notes:
             if note.title.value.lower() == title.lower():
                 txt = NoteText(new_text)
@@ -200,7 +237,16 @@ class NoteBook:
                     return "Note edited.", "success"
     
     @input_error
-    def search_notes(self, keyword: str):
+    def search_notes(self, keyword: str) -> list:
+        """
+        Search for notes that contain the keyword in their title or content.
+
+        Args:
+            keyword (str): Keyword to search for in notes.
+
+        Returns:
+            list: List of string representations of matching notes.
+        """
         notes = []
         for note in self.notes:
             if keyword.lower() in note.title.value.lower() or keyword.lower() in note.text.value.lower():
@@ -208,12 +254,24 @@ class NoteBook:
         return [str(note) for note in notes]
 
     @input_error
-    def show_all_notes(self):
+    def show_all_notes(self) -> list:
+        """
+        Get a list of all notes in the notebook.
+
+        Returns:
+            list: List of string representations of all notes.
+        """
         note_list = [str(note) for note in self.notes]
         return note_list
     
     @input_error
-    def clear_all_notes(self):
+    def clear_all_notes(self) -> tuple:
+        """
+        Delete all notes from the notebook.
+
+        Returns:
+            tuple: Message confirming that all notes were deleted.
+        """
         self.notes.clear()
         return "All the notes have been deleted.", "success"
 
