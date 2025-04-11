@@ -144,37 +144,6 @@ class Record:
     def delete_address(self, *args) -> tuple:
         self.address = None
         return "Address deleted.", "success"
-
-    @input_error
-    def add_email(self, email):
-        email = Email(email)
-        if email.value is None:
-            return "Please enter a valid email address (only Latin letters and must include @).", "warning"
-        self.email = email
-        return "Email added.", "success"
-
-    @input_error
-    def edit_email(self, new_email):
-        email = Email(new_email)
-        if email.value is None:
-            return "Please enter a valid email address (only Latin letters and must include @).", "warning"
-        if self.email is None:
-            return "No email found.", "warning"
-        self.email = email
-        return "Email changed.", "success"
-
-    @input_error
-    def delete_email(self):
-        if self.email is None or self.email.value is None:
-            return "No email found to delete.", "warning"
-        self.email = None
-        return "Email deleted.", "success"
-
-    @input_error
-    def show_email(self):
-        if self.email is None or self.email.value is None:
-            return "No email found.", "warning"
-        return f"{self.name.value.capitalize()}'s email: {self.email.value}", "common"
     
 
 class Note:
@@ -217,6 +186,36 @@ class NoteBook:
             if note.title.value.lower() == title.lower():
                 self.notes.remove(note)
                 return "Note deleted.", "success"
+            
+    @input_error
+    def edit_note(self, title, new_text):
+        for note in self.notes:
+            if note.title.value.lower() == title.lower():
+                txt = NoteText(new_text)
+                if txt.value is None:
+                    return "Note cannot be empty.", "warning"
+                else:
+                    note.text = txt
+                    note.updated_date = dtdt.now().replace(microsecond=0)
+                    return "Note edited.", "success"
+    
+    @input_error
+    def search_notes(self, keyword: str):
+        notes = []
+        for note in self.notes:
+            if keyword.lower() in note.title.value.lower() or keyword.lower() in note.text.value.lower():
+                notes.append(note)
+        return [str(note) for note in notes]
+
+    @input_error
+    def show_all_notes(self):
+        note_list = [str(note) for note in self.notes]
+        return note_list
+    
+    @input_error
+    def clear_all_notes(self):
+        self.notes.clear()
+        return "All the notes have been deleted.", "success"
 
 
 class AddressBook(UserDict):
