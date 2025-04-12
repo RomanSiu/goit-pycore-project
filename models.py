@@ -23,7 +23,7 @@ class Name(Field):
             self.value = name.lower()
         else:
             self.value = None
-            return "Please enter a valid contact name.", "warning"
+            return "⚠️ Please enter a valid contact name.", "warning"
 
 
 class Phone(Field):
@@ -100,7 +100,7 @@ class Email(Field):
             self.value = email
         else:
             self.value = None
-            return "Please enter a valid email address (only Latin letters and must include @).", "warning"
+            return "⚠️ Please enter a valid email address (only Latin letters and must include @).", "warning"
     
 
     def update(self, new_email):
