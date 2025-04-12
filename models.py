@@ -1,3 +1,4 @@
+import re
 from datetime import datetime as dtdt
 
 from utils import input_error
@@ -81,7 +82,7 @@ class Address(Field):
 
     @input_error
     def validate(self, address):
-        if address.isalpha():
+        if not address.isspace() and len(address) >= 3:
             self.value = address
 
             
@@ -92,11 +93,15 @@ class Email(Field):
 
     @input_error
     def validate(self, email):
+        email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+        if re.match(email_pattern, email):
+            self.value = email.lower()
         if "@" in email and email.replace("@", "").replace(".", "").isalnum() and email.isascii():
             self.value = email
         else:
             self.value = None
             return "Please enter a valid email address (only Latin letters and must include @).", "warning"
+    
 
     def update(self, new_email):
         self.validate(new_email)

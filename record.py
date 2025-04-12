@@ -105,6 +105,7 @@ class Record:
     def add_birthday(self, birthday):
         self.birthday = Birthday(birthday)
         if self.birthday.value is None:
+            self.birthday = None
             return "Invalid date format. Try DD.MM.YYYY.", "warning"
         return "Birthday added.", "success"
 
@@ -115,10 +116,13 @@ class Record:
         return f"{self.name.value.capitalize()}'s birthday: {dtdt.strftime(self.birthday.value, '%d.%m.%Y')}"
 
     @input_error
-    def add_address(self, address: str, *args) -> tuple:
+    def add_address(self, *args) -> tuple:
+        address = " ".join(args)
         address = Address(address)
         if address.value is None:
             return "Please enter a valid address.", "warning"
+        elif self.address is not None:
+            return "Address already exists.", "warning"
         else:
             self.address = address
             return "Address added.", "success"
@@ -147,10 +151,14 @@ class Record:
 
     @input_error
     def add_email(self, email):
-        email = Email(email)
-        if email.value is None:
-            return "Please enter a valid email address (only Latin letters and must include @).", "warning"
-        self.email = email
+        if hasattr(self, "email") and self.email is not None:
+            return "This contact already has an email.", "warning"
+
+        email_obj = Email(email)
+        if email_obj.value is None:
+            return "Please enter a valid email address.", "warning"
+
+        self.email = email_obj
         return "Email added.", "success"
 
     @input_error
