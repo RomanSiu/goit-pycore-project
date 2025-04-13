@@ -636,7 +636,7 @@ def main():
                 output(*add_birthday(command[1:], addressbook))
             case 'show-birthday':
                 output(*show_birthday(command[1:], addressbook))
-            case 'birthdays':
+            case 'upcoming-birthdays':
                 try:
                     days = int(command[1])
                 except IndexError:
