@@ -1,15 +1,15 @@
 import pickle
 import os
-import shlex
 
 from colorama import Fore, Style
 
 from utils import input_error
 from models import Name, Phone, Birthday, Address, Email, NoteText, Title
 from record import AddressBook, Record, NoteBook, Note
-from ui_helpers import user_input, user_output, extend_contact_interactive
+from ui_helpers import user_input, user_output, extend_contact_interactive, main_user_input
 from tableview import show_table, show_help_table
-from prompt_variants import get_prompts, title_prompts, text_prompt, edit_note_prompt, edit_text_prompt, title_search_prompt, delete_note_prompt
+from prompt_variants import (get_prompts, title_prompts, text_prompt, edit_note_prompt, edit_text_prompt,
+                             title_search_prompt, delete_note_prompt)
 
 
 def output(message: str, mtype: str):
@@ -40,10 +40,6 @@ def add_contact(args: list, book: AddressBook) -> tuple:
     Returns:
         tuple: Message.
     """
-    name = user_input("")
-    name_obj = Name(name)
-    if name_obj.value is None:
-        return "⚠️  Invalid number", "warning"
     name, phone, *_ = args
     record = book.find(name)
     if type(record) is tuple:
@@ -98,6 +94,20 @@ def delete_contact(args: list, book: AddressBook) -> tuple:
         return message
     else:
         return record
+
+
+@input_error
+def clear_all_contacts(book: AddressBook):
+    """
+    Clear all contacts from the AdressBook.
+
+    Args:
+        book (AddressBook): AddressBook to clear.
+
+    Returns:
+        tuple: Success or warning message if no notes exist.
+    """
+    return book.clear_all_contacts()
 
 
 @input_error
@@ -184,6 +194,7 @@ def show_birthday(args: list, book: AddressBook) -> tuple:
     else:
         return record
 
+
 @input_error
 def birthdays_table(book: AddressBook, days: int = 7) -> tuple:
     data, _ = book.get_upcoming_birthdays(days)
@@ -200,6 +211,7 @@ def birthdays_table(book: AddressBook, days: int = 7) -> tuple:
             continue
 
     return rows, "birthdays"
+
 
 @input_error
 def add_note(book: NoteBook):
@@ -475,6 +487,7 @@ def show_all_tags(book: NoteBook):
         return "⚠️  There are no tags in your notes.", "warning"
     return ["📌 Tags in your notes:"] + tags, "common list"
 
+
 @input_error
 def clear_all_tags(book:NoteBook):
     """
@@ -487,6 +500,7 @@ def clear_all_tags(book:NoteBook):
         tuple: Success message.
     """
     return book.clear_all_tags()
+
 
 @input_error
 def remove_tag_from_all(book: NoteBook):
@@ -503,7 +517,6 @@ def remove_tag_from_all(book: NoteBook):
     if not tag:
         return "⚠️  Tag cannot be empty.", "warning"
     return book.remove_tag_from_all(tag)
-
 
 
 @input_error
@@ -562,6 +575,7 @@ def delete_email(args, book):
         return record.delete_email()
     return "⚠️  Contact not found.", "warning"
 
+
 # Серіалізація даних в окремий файл з обох книг
 def save_data(books, filename="data/addressbook_and_notebook.pkl"):
     # створює директорію, якщо вона не існує
@@ -583,7 +597,7 @@ def main():
     addressbook, notebook = load_data()
     user_output("Welcome to the assistant bot!")
     while True:
-        command = shlex.split(input("Write a command: "))
+        command = main_user_input()
         if not command:
             continue
         command[0] = command[0].lower()
@@ -622,12 +636,14 @@ def main():
                 output(*add_birthday(command[1:], addressbook))
             case 'show-birthday':
                 output(*show_birthday(command[1:], addressbook))
-            case 'upcoming-birthdays':
+            case 'birthdays':
                 try:
                     days = int(command[1])
                 except IndexError:
                     days = 7
                 show_table(*birthdays_table(addressbook, days))
+            case 'clear-all-contacts':
+                output(*clear_all_contacts(addressbook))
             case 'add-note':
                 output(*add_note(notebook))
             case 'find-note':

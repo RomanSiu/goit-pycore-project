@@ -202,7 +202,7 @@ class Note:
             f"🏷️  {tag_line}\n"
             f"🕒 Created: {self.created_date}\n"
             f"🕒 Updated: {self.updated_date}\n"
-            f"{"="*35}"
+            f"{'='*35}"
         )
     
     def add_title(self, title_str):
@@ -235,7 +235,6 @@ class Note:
             return "⚠️  Tag already exists or invalid.", "warning"
         self.tags.append(tag)
         return f"Tag '{tag}' added to the note.", "success"
-    
 
     def remove_tag(self, tag: str) -> tuple:
         """
@@ -251,7 +250,6 @@ class Note:
             self.tags.remove(tag)
             return f"Tag '{tag}' removed from the note.", "success"
         return f"⚠️  Tag '{tag}' not found in this note.", "warning"
-
 
 
 class NoteBook:
@@ -445,6 +443,7 @@ class NoteBook:
             return f"⚠️  Tag 'tag' not found in any note.", "warning"
         return f"Tag '{tag}' remove from {count} note(s).", "success"
 
+
 class AddressBook(UserDict):
     @input_error
     def add_record(self, record):
@@ -479,3 +478,14 @@ class AddressBook(UserDict):
                 user_bday = f"{user.name.value.capitalize()}: {dtdt.strftime(bday, '%d.%m.%Y')}"
                 lst.append(user_bday)
         return lst, "common list"
+
+    @input_error
+    def clear_all_contacts(self) -> tuple:
+        """
+        Delete all contacts from the addressbook.
+
+        Returns:
+            tuple: Message confirming that all notes were deleted.
+        """
+        self.data.clear()
+        return "All the contacts have been deleted.", "success"

@@ -1,6 +1,7 @@
 from prettytable import PrettyTable
 from colorama import Fore, Style
 
+
 def show_table(message, mtype=None):
     if mtype == 'success':
         print(Fore.GREEN + message + Style.RESET_ALL)
@@ -32,6 +33,7 @@ def show_table(message, mtype=None):
                 f"{Fore.BLUE}{email}{Style.RESET_ALL}",
                 f"{Fore.WHITE}{address}{Style.RESET_ALL}"
             ])
+        print(table)
     elif mtype == 'birthdays' and isinstance(message, list):
         table = PrettyTable()
         table.field_names = [
@@ -47,10 +49,7 @@ def show_table(message, mtype=None):
                 f"{Fore.GREEN}{name}{Style.RESET_ALL}",
                 f"{Fore.MAGENTA}{bday}{Style.RESET_ALL}"
             ])
-
-    print(table)
-
-
+        print(table)
 
 
 def show_help_table():
@@ -65,7 +64,8 @@ def show_help_table():
             ("change-contact", "Change a contact's phone number"),
             ("show-phone", "Show phone numbers of a contact"),
             ("delete", "Delete a contact"),
-            ("show-all", "Display all contacts")
+            ("show-all", "Display all contacts"),
+            ("clear-all-contacts", "Clear all contacts")
         ],
         "🏠 ADDRESS": [
             ("add-address", "Add an address to a contact"),
