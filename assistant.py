@@ -8,7 +8,8 @@ from utils import input_error
 from models import Name, Phone, Birthday, Address, Email, NoteText, Title
 from record import AddressBook, Record, NoteBook, Note
 from ui_helpers import user_input, user_output, extend_contact_interactive
-from tableview import show_table
+from tableview import show_table, show_help_table
+from prompt_variants import get_prompts, title_prompts, text_prompt, edit_note_prompt, edit_text_prompt, title_search_prompt, delete_note_prompt
 
 
 def output(message: str, mtype: str):
@@ -39,6 +40,10 @@ def add_contact(args: list, book: AddressBook) -> tuple:
     Returns:
         tuple: Message.
     """
+    name = user_input("")
+    name_obj = Name(name)
+    if name_obj.value is None:
+        return "⚠️  Invalid number", "warning"
     name, phone, *_ = args
     record = book.find(name)
     if type(record) is tuple:
@@ -184,7 +189,7 @@ def birthdays_table(book: AddressBook, days: int = 7) -> tuple:
     data, _ = book.get_upcoming_birthdays(days)
 
     if len(data) <= 1:
-        return f"No birthdays in the next {days} days.", "warning"
+        return f"⚠️  No birthdays in the next {days} days.", "warning"
 
     rows = []
     for line in data[1:]:  # пропускаємо заголовок
@@ -207,17 +212,28 @@ def add_note(book: NoteBook):
     Returns:
         tuple: Success or warning message.
     """
-    title = user_input("Write the title of the note:\n>  ")
-    title_obj = Title(title)
-    if title_obj.value is None:
-        return "Title must be 15 characters or less.", "warning"
+    title = user_input(get_prompts(title_prompts))
 
-    text = user_input("Write the text of the note:\n>  ")
-    note = book.find_note(title)
-    if note:
-        return "Note with this title already exists. Change the title", "warning"
+    note = Note()
+    message = note.add_title(title)
+    if message:
+        return message
+    
+    if book.find_note(title):
+        return "⚠️  Note with this title already exists. Change the title", "warning"
+    
+    text = user_input(get_prompts(text_prompt))
+    message = note.add_text(text)
+    if message:
+        return message
+    
+    add_tag_answer = user_input("Would you like to add a 🏷️  tag? (Y/N):\n>  ").strip().lower()
+    if add_tag_answer == "y":
+        tag = user_input("Enter a tag:\n>  ").strip()
+        tag_msg = note.add_tag(tag)
+        if tag_msg:
+            output(*tag_msg)
 
-    note = Note(title, text)
     return book.add_note(note)
 
 
@@ -232,11 +248,11 @@ def find_note(book: NoteBook):
     Returns:
         tuple: Note content if found, otherwise warning message.
     """
-    title = user_input("Enter the title of the note to find:\n>  ")
+    title = user_input(get_prompts(title_search_prompt))
     note = book.find_note(title)
     if isinstance(note, Note):
-        return str(note), "common"
-    return "Note with this title doesn't exist.", "warning"
+        return note.format_for_display(), "common"
+    return "⚠️  Note with this title doesn't exist.", "warning"
 
 
 @input_error
@@ -250,12 +266,22 @@ def edit_note(book: NoteBook):
     Returns:
         tuple: Success message or warning if not found or empty.
     """
-    title = user_input("Write the title of the note to edit:\n>  ")
+    title = user_input(get_prompts(edit_note_prompt))
     note = book.find_note(title)
     if not note:
-        return "Note with this title doesn't exist.", "warning"
+        return "⚠️  Note with this title doesn't exist.", "warning"
 
-    new_text = user_input("Write the new text for the note:\n>  ")
+    new_text = user_input(get_prompts(edit_text_prompt))
+    message = note.add_text(new_text)
+    if message:
+        return message
+    
+    add_tag_answer = user_input("Would you like to add a 🏷️  tag to this note? (Y/N):\n>  ").strip().lower()
+    if add_tag_answer == "y":
+        tag = user_input("Enter a tag:\n>  ").strip()
+        tag_msg = note.add_tag(tag)
+        if tag_msg:
+            output(*tag_msg)
     return book.edit_note(title, new_text)
 
 
@@ -270,13 +296,13 @@ def delete_note(book: NoteBook):
     Returns:
         tuple: Success message or warning if not found.
     """
-    title = user_input("Write the title of the note to delete:\n>  ")
+    title = user_input(get_prompts(delete_note_prompt))
     if not title.strip():
-        return "Note title cannot be empty.", "warning"
+        return "⚠️  Note title cannot be empty.", "warning"
 
     message = book.delete_note(title)
     if message is None:
-        return "Note not found.", "warning"
+        return "⚠️  Note not found.", "warning"
 
     return message
 
@@ -294,7 +320,7 @@ def show_all_notes(book: NoteBook):
     """
     notes = book.show_all_notes()
     if not notes:
-        return "No notes found.", "warning"
+        return "⚠️  No notes found.", "warning"
 
     return notes, "common list"
 
@@ -310,16 +336,28 @@ def search_notes(book: NoteBook):
     Returns:
         tuple: List of matched notes or warning if nothing found.
     """
-    keyword = user_input("Enter keyword to search in notes:\n>  ")
+    keyword = user_input("Enter keyword to search in notes 🔍 :\n>  ").strip()
     if not keyword.strip():
-        return "Please, enter a keyword.", "warning"
+        return "⚠️  Please, enter a keyword.", "warning"
 
     result = book.search_notes(keyword)
     if not result:
-        return "No matches found.", "warning"
+        return "⚠️  No matches found.", "warning"
 
     results = ["The results of the search:"] + result
-    return results, "common list"
+    output(results, "common list")
+
+    add_as_tag = user_input(f"Would you like to add '{keyword}' as a 🏷️  tag to all matching notes? (Y/N):\n>  ").strip().lower()
+    if add_as_tag == "y":
+        count = 0
+        for note_str in result:
+            for note in book.notes:
+                if str(note) == note_str:
+                    message = note.add_tag(keyword)
+                    if message and message[1] == "success":
+                        count +=1
+        return f"Keyword '{keyword}' added as tag to {count} note(s).", "success"
+    return None
 
 
 @input_error
@@ -333,7 +371,7 @@ def import_note(book: NoteBook):
     Returns:
         tuple: Success message or error if the file is invalid.
     """
-    file_path = user_input("Enter file path to import note:\n>  ")
+    file_path = user_input("Enter file name (with .txt) to import note:\n>  ")
     if not os.path.exists(file_path):
         return "File not found.", "error"
 
@@ -341,7 +379,9 @@ def import_note(book: NoteBook):
     with open(file_path, "r", encoding="utf-8") as f:
         text = f.read()
 
-    note = Note(title, text)
+    note = Note()
+    note.add_title(title)
+    note.add_text(text)
     return book.add_note(note)
 
 
@@ -357,11 +397,115 @@ def clear_all_notes(book: NoteBook):
         tuple: Success or warning message if no notes exist.
     """
     if not book.notes:
-        return "There are no notes to delete.", "warning"
+        return "⚠️  There are no notes to delete.", "warning"
 
     return book.clear_all_notes()
 
   
+@input_error
+def search_notes_by_tag(book: NoteBook):
+    """
+    Search notes by tag entered by the user.
+
+    Args:
+        book (NoteBook): The notebook to search in.
+
+    Returns:
+        tuple: List of matching notes or a warning message.
+    """
+    tag = user_input("Enter the 🏷️  tag to search:\n>  ")
+    if not tag.strip():
+        return "⚠️  Tag cannot be empty.", "warning"
+    result = book.search_by_tag(tag)
+    if not result:
+        return f"⚠️  No notes found with this tag '{tag}'.", "warning"
+    return [f"Notes with tag '{tag}':"] + result, "common list"
+
+
+@input_error
+def sort_notes_by_tag(book: NoteBook):
+    """
+    Sort notes by the number of tags and display them.
+
+    Args:
+        book (NoteBook): The notebook to sort.
+
+    Returns:
+        tuple: Sorted notes list or a warning.
+    """
+    sorted_notes = book.sort_by_tag()
+    if not sorted_notes:
+        return "⚠️  No notes to sort.", "warning"
+    return sorted_notes, "common list"
+
+
+@input_error
+def remove_tag(book: NoteBook):
+    """
+    Remove a tag from a specific note.
+
+    Args:
+        book (NoteBook): The notebook containing the note.
+
+    Returns:
+        tuple: Success or warning message.
+    """
+    title = user_input(get_prompts(title_search_prompt))
+    note = book.find_note(title)
+    if not note:
+        return "⚠️  Note not found.", "warning"
+    
+    tag = user_input("Enter the 🏷️  tag to remove:\n>  ").strip()
+    return note.remove_tag(tag)
+
+
+@input_error
+def show_all_tags(book: NoteBook):
+    """
+    Display a list of all unique tags across notes.
+
+    Args:
+        book (NoteBook): The notebook containing the notes.
+
+    Returns:
+        tuple: List of tags or a warning if none exist.
+    """
+    tags = book.list_all_tags()
+    if not tags:
+        return "⚠️  There are no tags in your notes.", "warning"
+    return ["📌 Tags in your notes:"] + tags, "common list"
+
+@input_error
+def clear_all_tags(book:NoteBook):
+    """
+    Clear all tags from all notes in the notebook.
+
+    Args:
+        book (NoteBook): The notebook to clear tags from.
+
+    Returns:
+        tuple: Success message.
+    """
+    return book.clear_all_tags()
+
+@input_error
+def remove_tag_from_all(book: NoteBook):
+    """
+    Remove a specific tag from all notes in the notebook.
+
+    Args:
+        book (NoteBook): The notebook to update.
+
+    Returns:
+        tuple: Success or warning message.
+    """
+    tag = user_input("Enter the 🏷️  tag to remove from all notes:\n>  ").strip()
+    if not tag:
+        return "⚠️  Tag cannot be empty.", "warning"
+    return book.remove_tag_from_all(tag)
+
+
+
 @input_error
 def address(args: list, book: AddressBook, func: str) -> tuple:
     """
@@ -389,7 +533,7 @@ def add_email(args, book):
     record = book.find(name)
     if record:
         return record.add_email(email)
-    return "Contact not found.", "warning"
+    return "⚠️  Contact not found.", "warning"
 
 
 @input_error
@@ -398,7 +542,7 @@ def edit_email(args, book):
     record = book.find(name)
     if record:
         return record.edit_email(new_email)
-    return "Contact not found.", "warning"
+    return "⚠️  Contact not found.", "warning"
 
 
 @input_error
@@ -407,7 +551,7 @@ def show_email(args, book):
     record = book.find(name)
     if record:
         return record.show_email()
-    return "Contact not found.", "warning"
+    return "⚠️  Contact not found.", "warning"
 
 
 @input_error
@@ -416,56 +560,7 @@ def delete_email(args, book):
     record = book.find(name)
     if record:
         return record.delete_email()
-    return "Contact not found.", "warning"
-
-
-def show_help():
-    sections = {
-        "🤖 Загальне": [
-            "hello                 - Привітання з ботом",
-            "help                  - Показати всі доступні команди",
-            "exit / close          - Вихід з бота"
-        ],
-        "📞 Контакти": [
-            "add-contact           - Додати контакт",
-            "change-contact        - Змінити номер телефону контакту",
-            "show-phone            - Показати телефон контакту",
-            "show-all              - Показати всі контакти"
-        ],
-        "📍 Адреса": [
-            "add-address           - Додати адресу контакту",
-            "show-address          - Показати адресу контакту",
-            "change-address        - Змінити адресу контакту",
-            "delete-address        - Видалити адресу контакту"
-        ],
-        "✉️ Email": [
-            "add-email             - Додати email контакту",
-            "change-email          - Змінити email контакту",
-            "show-email            - Показати email контакту",
-            "delete-email          - Видалити email контакту"
-        ],
-        "🎂 День народження": [
-            "add-birthday          - Додати день народження",
-            "show-birthday         - Показати день народження",
-            "upcoming-birthdays    - Показати дні народження на найближчі дні"
-        ],
-        "📝 Нотатки": [
-            "add-note              - Додати нотатку",
-            "find-note             - Знайти нотатку за назвою",
-            "edit-note             - Редагувати нотатку",
-            "delete-note           - Видалити нотатку",
-            "show-all-notes        - Показати всі нотатки",
-            "search-notes          - Пошук по нотатках за ключовим словом",
-            "import-note           - Імпортувати нотатку з файлу",
-            "clear-all-notes       - Видалити всі нотатки"
-        ]
-    }
-
-    for section, cmds in sections.items():
-        user_output(f"\n{section}", "info")
-        for cmd in cmds:
-            user_output(cmd, "info")
-
+    return "⚠️  Contact not found.", "warning"
 
 # Серіалізація даних в окремий файл з обох книг
 def save_data(books, filename="data/addressbook_and_notebook.pkl"):
@@ -549,8 +644,20 @@ def main():
                 output(*import_note(notebook))
             case 'clear-all-notes':
                 output(*clear_all_notes(notebook))
+            case 'search-by-tag':
+                output(*search_notes_by_tag(notebook))
+            case 'sort-by-tag':
+                output(*sort_notes_by_tag(notebook))
+            case 'remove-tag':
+                output(*remove_tag(notebook))
+            case 'show-tags':
+                output(*show_all_tags(notebook))
+            case 'clear-all-tags':
+                output(*clear_all_tags(notebook))
+            case 'remove-tag-from-all':
+                output(*remove_tag_from_all(notebook))
             case 'help':
-                show_help()
+                show_help_table()
             case 'show-all':
                 show_table(*show_all(addressbook))
             case _:

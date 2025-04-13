@@ -43,8 +43,14 @@ This is the __CLI Address Book__ - an application that will simplify your work w
 | "edit-note"      | -                      | edit the note                         |
 | "delete-note"    | -                      | delete the note                       |
 | "show-all-notes" | -                      | show all notes                        |
-| "search-note"    | -                      | find note by keyword in title or text |
+| "search-notes"    | -                      | find note by keyword in title or text |
 | "import-note"         | -                      | import notes from text file           |
 | "clear-all-notes"    | -                      | clear all notebook                    |
+| "search-by-tag"  | -                      | search note by the tag                     |
+| "sort-by-tag"    | -                      | sort notes by the tag                     |
+| "remove-tag"     | -                      | remove tag from the note                     |
+| "show-tags"      | -                      | show the list of tags in nootbook             |
+| "clear-all-tags" | -                      | clear all the tags from all of the notes     |
+| "remove-tag-from-all"  | -                | remove one tag from all notes               |
 
 # _Good luck!_
