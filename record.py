@@ -42,7 +42,7 @@ class Record:
             self.phones.append(phone)
             return "Phone added.", "success"
         else:
-            return "Phone already exists.", "warning"
+            return "⚠️  Phone already exists.", "warning"
 
     @input_error
     def remove_phone(self, phone_rm: str) -> tuple:
@@ -60,7 +60,7 @@ class Record:
                 self.phones.remove(phone)
                 return f"Phone {phone_rm} removed.", "success"
 
-        return "No such phone exists.", "warning"
+        return "⚠️  No such phone exists.", "warning"
 
     @input_error
     def edit_phone(self, old_phone: str, new_phone: str) -> tuple:
@@ -77,14 +77,14 @@ class Record:
         new_phone = Phone(new_phone)
 
         if new_phone.value is None:
-            return "Please enter a valid phone number.", "warning"
+            return "⚠️  Please enter a valid phone number.", "warning"
 
         for phone in self.phones:
             if old_phone == phone.value and new_phone.value:
                 phone.value = new_phone.value
                 return f"Phone {old_phone} changed to {new_phone}.", "success"
 
-        return "No such phone exists.", "warning"
+        return "⚠️  No such phone exists.", "warning"
 
     @input_error
     def find_phone(self, phone_to_find: str) -> tuple:
@@ -106,13 +106,13 @@ class Record:
         self.birthday = Birthday(birthday)
         if self.birthday.value is None:
             self.birthday = None
-            return "Invalid date format. Try DD.MM.YYYY.", "warning"
+            return "⚠️  Invalid date format. Try DD.MM.YYYY.", "warning"
         return "Birthday added.", "success"
 
     @input_error
     def show_birthday(self):
         if self.birthday is None:
-            return "No birthday found.", "warning"
+            return "⚠️  No birthday found.", "warning"
         return f"{self.name.value.capitalize()}'s birthday: {dtdt.strftime(self.birthday.value, '%d.%m.%Y')}"
 
     @input_error
@@ -122,7 +122,7 @@ class Record:
         if address.value is None:
             return "Please enter a valid address.", "warning"
         elif self.address is not None:
-            return "Address already exists.", "warning"
+            return "⚠️  Address already exists.", "warning"
         else:
             self.address = address
             return "Address added.", "success"
@@ -130,16 +130,16 @@ class Record:
     @input_error
     def show_address(self, *args) -> tuple:
         if self.address is None:
-            return "No address found.", "warning"
+            return "⚠️  No address found.", "warning"
         return self.address.value, "common"
 
     @input_error
     def edit_address(self, address: str, *args) -> tuple:
         address = Address(address)
         if self.address is None:
-            return "No address found.", "warning"
+            return "⚠️  No address found.", "warning"
         elif address.value is None:
-            return "Please enter a valid address.", "warning"
+            return "⚠️  Please enter a valid address.", "warning"
         else:
             self.address = address
             return "Address changed.", "success"
@@ -152,11 +152,11 @@ class Record:
     @input_error
     def add_email(self, email):
         if hasattr(self, "email") and self.email is not None:
-            return "This contact already has an email.", "warning"
+            return "⚠️  This contact already has an email.", "warning"
 
         email_obj = Email(email)
         if email_obj.value is None:
-            return "Please enter a valid email address.", "warning"
+            return "⚠️  Please enter a valid email address.", "warning"
 
         self.email = email_obj
         return "Email added.", "success"
@@ -165,45 +165,98 @@ class Record:
     def edit_email(self, new_email):
         email = Email(new_email)
         if email.value is None:
-            return "Please enter a valid email address (only Latin letters and must include @).", "warning"
+            return "⚠️  Please enter a valid email address (only Latin letters and must include @).", "warning"
         if self.email is None:
-            return "No email found.", "warning"
+            return "⚠️  No email found.", "warning"
         self.email = email
         return "Email changed.", "success"
 
     @input_error
     def delete_email(self):
         if self.email is None or self.email.value is None:
-            return "No email found to delete.", "warning"
+            return "⚠️  No email found to delete.", "warning"
         self.email = None
         return "Email deleted.", "success"
 
     @input_error
     def show_email(self):
         if self.email is None or self.email.value is None:
-            return "No email found.", "warning"
+            return "⚠️  No email found.", "warning"
         return f"{self.name.value.capitalize()}'s email: {self.email.value}", "common"
     
 
 class Note:
-    def __init__(self, title, text):
-        self.title = Title(title)
-        self.text = NoteText(text)
+    def __init__(self):
+        self.title = None
+        self.text = None
+        self.tags = []
         self.created_date = dtdt.now().replace(microsecond=0)
         self.updated_date = dtdt.now().replace(microsecond=0)
     
-    def __str__(self):
-        return (f"Title: {self.title.value}\n"
-                f"Content: {self.text.value}\n"
-                f"Created: {self.created_date}\n"
-                f"Updated: {self.updated_date}\n")
+    def format_for_display(self):
+        tag_line = f"Tags: {', '.join(self.tags)}\n" if self.tags else "Tags: "
+        return (
+            f"{'='*35}\n"
+            f"📌 Title: {self.title.value}\n"
+            f"📝 Content: {self.text.value}\n"
+            f"🏷️  {tag_line}\n"
+            f"🕒 Created: {self.created_date}\n"
+            f"🕒 Updated: {self.updated_date}\n"
+            f"{'='*35}"
+        )
+    
+    def add_title(self, title_str):
+        title = Title(title_str)
+        if title.value is None:
+            return "⚠️  Note cannot be empty.", "warning"
+        self.title = title
+        return None
+        
+    def add_text(self, text_str):
+        text = NoteText(text_str)
+        if text.value is None:
+            return "⚠️  Text cannot be empty.", "warning"
+        self.text = text
+        return None
+
+    def add_tag(self, tag: str) -> tuple:
+        """
+        Add a tag to the note.
+
+        Args:
+            tag (str): The tag to be added.
+
+        Returns:
+            tuple: Message indicating success or warning.
+        """
+        if not tag.strip():
+            return "⚠️  Tag cannot be empty.", "warning"
+        elif tag in self.tags:
+            return "⚠️  Tag already exists or invalid.", "warning"
+        self.tags.append(tag)
+        return f"Tag '{tag}' added to the note.", "success"
+
+    def remove_tag(self, tag: str) -> tuple:
+        """
+        Remove a tag from the note.
+
+        Args:
+            tag (str): The tag to be removed.
+
+        Returns:
+            tuple: Success message or warning if tag not found.
+        """
+        if tag in self.tags:
+            self.tags.remove(tag)
+            return f"Tag '{tag}' removed from the note.", "success"
+        return f"⚠️  Tag '{tag}' not found in this note.", "warning"
 
 
 class NoteBook:
     def __init__(self):
         super().__init__()
         self.notes = []
-
+    
     @input_error
     def add_note(self, note: Note) -> tuple:
         """
@@ -215,10 +268,10 @@ class NoteBook:
         Returns:
             tuple: Message and message type indicating success or validation warning.
         """
-        if note.text.value is None:
-            return "Note cannot be empty.", "warning"
+        if self.find_note(note.title.value):
+            return "⚠️  Note with this title already exists. Change the title", "warning"
         elif note.title.value is None:
-            return "Title must be 15 characters or less.", "warning"
+            return "⚠️  Title must be 15 characters or less.", "warning"
         self.notes.append(note)
         return "Note added.", "success"
     
@@ -269,7 +322,7 @@ class NoteBook:
             if note.title.value.lower() == title.lower():
                 txt = NoteText(new_text)
                 if txt.value is None:
-                    return "Note cannot be empty.", "warning"
+                    return "⚠️  Note cannot be empty.", "warning"
                 else:
                     note.text = txt
                     note.updated_date = dtdt.now().replace(microsecond=0)
@@ -290,7 +343,7 @@ class NoteBook:
         for note in self.notes:
             if keyword.lower() in note.title.value.lower() or keyword.lower() in note.text.value.lower():
                 notes.append(note)
-        return [str(note) for note in notes]
+        return [note.format_for_display() for note in notes]
 
     @input_error
     def show_all_notes(self) -> list:
@@ -300,7 +353,7 @@ class NoteBook:
         Returns:
             list: List of string representations of all notes.
         """
-        note_list = [str(note) for note in self.notes]
+        note_list = [note.format_for_display() for note in self.notes]
         return note_list
     
     @input_error
@@ -313,6 +366,82 @@ class NoteBook:
         """
         self.notes.clear()
         return "All the notes have been deleted.", "success"
+    
+    @input_error
+    def search_by_tag(self, tag: str) -> list:
+        """
+        Search for notes by tag.
+
+        Args:
+            tag (str): Tag to search for in notes.
+
+        Returns:
+            list: List of string representations of notes containing the tag.
+        """
+        results = [note for note in self.notes if tag in note.tags]
+        return [note.format_for_display() for note in results]
+    
+    @input_error
+    def sort_by_tag(self) -> list:
+        """
+        Sort notes by the number of tags (ascending) and alphabetically by title.
+
+        Returns:
+            list: List of string representations of sorted notes.
+        """
+        tagged_notes = [note for note in self.notes if note.tags]
+        untagged_notes = [note for note in self.notes if not note.tags]
+
+        tagged_sorted = sorted(tagged_notes, key=lambda n: (-len(n.tags), n.title.value.lower()))
+        untagged_sorted = sorted(untagged_notes, key=lambda n: n.title.value.lower())
+
+        sorted_notes = tagged_sorted + untagged_sorted
+        return [note.format_for_display() for note in sorted_notes]
+    
+    @input_error
+    def list_all_tags(self) -> list:
+        """
+        Return a list of all unique tags in the notebook.
+
+        Returns:
+            list: List of tag strings.
+        """
+        tags = set()
+        for note in self.notes:
+            tags.update(note.tags)
+        return sorted(tags)
+    
+    @input_error
+    def clear_all_tags(self) -> tuple:
+        """
+        Remove all tags from every note in the notebook.
+
+        Returns:
+            tuple: Message indicating success.
+        """
+        for note in self.notes:
+            note.tags.clear()
+        return "All tags have been removed from all notes.", "success"
+    
+    @input_error
+    def remove_tag_from_all(self, tag: str) -> tuple:
+        """
+        Remove a specific tag from all notes where it appears.
+
+        Args:
+            tag (str): The tag to remove.
+
+        Returns:
+            tuple: Message indicating how many notes were affected.
+        """
+        count = 0
+        for note in self.notes:
+            if tag in note.tags:
+                note.tags.remove(tag)
+                count += 1
+        if count == 0:
+            return f"⚠️  Tag 'tag' not found in any note.", "warning"
+        return f"Tag '{tag}' remove from {count} note(s).", "success"
 
 
 class AddressBook(UserDict):
@@ -349,3 +478,14 @@ class AddressBook(UserDict):
                 user_bday = f"{user.name.value.capitalize()}: {dtdt.strftime(bday, '%d.%m.%Y')}"
                 lst.append(user_bday)
         return lst, "common list"
+
+    @input_error
+    def clear_all_contacts(self) -> tuple:
+        """
+        Delete all contacts from the addressbook.
+
+        Returns:
+            tuple: Message confirming that all notes were deleted.
+        """
+        self.data.clear()
+        return "All the contacts have been deleted.", "success"
