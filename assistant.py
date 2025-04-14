@@ -8,8 +8,7 @@ from models import Name, Phone, Birthday, Address, Email, NoteText, Title
 from record import AddressBook, Record, NoteBook, Note
 from ui_helpers import user_input, user_output, extend_contact_interactive, main_user_input
 from tableview import show_table, show_help_table
-from prompt_variants import (get_prompts, title_prompts, text_prompt, edit_note_prompt, edit_text_prompt,
-                             title_search_prompt, delete_note_prompt)
+from prompt_variants import (get_prompts, title_prompts, text_prompt, edit_note_prompt, edit_text_prompt, title_search_prompt, delete_note_prompt)
 
 
 def output(message: str, mtype: str):
@@ -41,11 +40,13 @@ def add_contact(args: list, book: AddressBook) -> tuple:
         tuple: Message.
     """
     name, phone, *_ = args
+    if phone == "":
+        return "Enter a phone number.", "warning"
     record = book.find(name)
     if type(record) is tuple:
         record = Record(name)
         message = record.add_phone(phone)
-        if message[1] in ["warrning", "error"]:
+        if message[1] in ["warning", "error"]:
             return message
         book.add_record(record)
         extend_contact_interactive(record, book)
@@ -73,6 +74,23 @@ def change_contact(args: list, book: AddressBook) -> tuple:
         return message
     else:
         return record
+
+
+@input_error
+def find_contact(args: list, book: AddressBook) -> tuple:
+    """
+    Find a contact in the address book.
+
+    Args:
+        args (list): Argument list from command line.
+        book (AddressBook): Address book to save records.
+
+    Returns:
+        tuple: tuple with list of contacts of message.
+    """
+    keyword, *_ = args
+    records = book.find_by_keyword(keyword)
+    return records
 
 
 @input_error
@@ -352,24 +370,26 @@ def search_notes(book: NoteBook):
     if not keyword.strip():
         return "⚠️  Please, enter a keyword.", "warning"
 
-    result = book.search_notes(keyword)
-    if not result:
+    matched_notes = [note for note in book.notes
+                     if keyword.lower() in note.title.value.lower()
+                     or keyword.lower() in note.text.value.lower()]
+
+    if not matched_notes:
         return "⚠️  No matches found.", "warning"
 
-    results = ["The results of the search:"] + result
+    results = ["The results of the search:"] + [note.format_for_display() for note in matched_notes]
     output(results, "common list")
 
-    add_as_tag = user_input(f"Would you like to add '{keyword}' as a 🏷️  tag to all matching notes? (Y/N):\n>  ").strip().lower()
+    add_as_tag = (user_input(f"Would you like to add '{keyword}' as a 🏷️  tag to all matching notes? (Y/N):\n>  ")
+                  .strip().lower())
     if add_as_tag == "y":
         count = 0
-        for note_str in result:
-            for note in book.notes:
-                if str(note) == note_str:
-                    message = note.add_tag(keyword)
-                    if message and message[1] == "success":
-                        count +=1
+        for note in matched_notes:
+            message = note.add_tag(keyword)
+            if message and message[1] == "success":
+                count += 1
         return f"Keyword '{keyword}' added as tag to {count} note(s).", "success"
-    return None
+    return f"Was found {len(matched_notes)} note(s) by this keyword.", "success"
 
 
 @input_error
@@ -449,6 +469,19 @@ def sort_notes_by_tag(book: NoteBook):
     if not sorted_notes:
         return "⚠️  No notes to sort.", "warning"
     return sorted_notes, "common list"
+
+
+@input_error
+def add_tag(book: NoteBook):
+    title = user_input("Enter the title of a note:\n>  ")
+    note = book.find_note(title)
+    if not note:
+        return "⚠️  Note with this title doesn't exist.", "warning"
+    tag = user_input("Enter the 🏷️  tag to add:\n>  ")
+    if not tag.strip():
+        return "⚠️  Tag cannot be empty.", "warning"
+    message = note.add_tag(tag)
+    return message
 
 
 @input_error
@@ -544,7 +577,7 @@ def address(args: list, book: AddressBook, func: str) -> tuple:
 def add_email(args, book):
     name, email = args
     record = book.find(name)
-    if record:
+    if type(record) is not tuple:
         return record.add_email(email)
     return "⚠️  Contact not found.", "warning"
 
@@ -612,6 +645,8 @@ def main():
                 output(*add_contact(command[1:], addressbook))
             case 'change-contact':
                 output(*change_contact(command[1:], addressbook))
+            case 'find-contact':
+                show_table(*find_contact(command[1:], addressbook))
             case 'show-phone':
                 output(*show_phone(command[1:], addressbook))
             case 'delete-contact':
@@ -636,7 +671,7 @@ def main():
                 output(*add_birthday(command[1:], addressbook))
             case 'show-birthday':
                 output(*show_birthday(command[1:], addressbook))
-            case 'upcoming-birthdays':
+            case 'birthdays':
                 try:
                     days = int(command[1])
                 except IndexError:
@@ -664,6 +699,8 @@ def main():
                 output(*search_notes_by_tag(notebook))
             case 'sort-by-tag':
                 output(*sort_notes_by_tag(notebook))
+            case 'add-tag':
+                output(*add_tag(notebook))
             case 'remove-tag':
                 output(*remove_tag(notebook))
             case 'show-tags':

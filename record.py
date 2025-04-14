@@ -17,12 +17,15 @@ class Record:
     def __str__(self):
         birthday_str = ""
         address_str = ""
+        email_str = ""
         if self.birthday:
-            birthday_str = f"birthday: {self.birthday.strftime('%d.%m.%Y')}"
+            birthday_str = f", birthday: {self.birthday.value.strftime('%d.%m.%Y')}"
         if self.address:
-            address_str = f"address: {self.address}"
+            address_str = f", address: {self.address}"
+        if self.email:
+            email_str = f", email: {self.email}"
         return (f"Contact name: {self.name.value}, phones: {'; '.join(str(p.value) for p in self.phones)}"
-                + birthday_str + address_str)
+                + birthday_str + email_str + address_str)
 
     @input_error
     def add_phone(self, phone: str) -> tuple:
@@ -183,7 +186,17 @@ class Record:
         if self.email is None or self.email.value is None:
             return "⚠️  No email found.", "warning"
         return f"{self.name.value.capitalize()}'s email: {self.email.value}", "common"
-    
+
+    @input_error
+    def get_contact_keywords(self):
+        keywords = [self.name.value]
+        [keywords.append(p.value) for p in self.phones]
+        if self.birthday:
+            keywords.append(self.birthday.value.strftime("%d.%m.%Y"))
+        if self.email:
+            keywords.append(self.email.value)
+        return keywords
+
 
 class Note:
     def __init__(self):
@@ -453,6 +466,23 @@ class AddressBook(UserDict):
     @input_error
     def find(self, name):
         return self.data[name.lower()]
+
+    @input_error
+    def find_by_keyword(self, keyword):
+        contacts = []
+        for contact in self.data.values():
+            contact_keywords = contact.get_contact_keywords()
+            if keyword.lower() in contact_keywords:
+                name = contact.name.value.capitalize()
+                phones = "; ".join(p.value for p in contact.phones)
+                birthday = contact.birthday.value.strftime('%d.%m.%Y') if contact.birthday else "-"
+                email = contact.email.value if contact.email else "-"
+                address = contact.address.value if contact.address else "-"
+                contacts.append([name, phones, birthday, email, address])
+
+        if contacts:
+            return contacts, "table"
+        return "No contact found.", "warning"
 
     @input_error
     def delete(self, name):
