@@ -596,7 +596,7 @@ def main():
                 user_output("How can I help you?")
             case 'add-contact':
                 output(*add_contact(command[1:], addressbook))
-            case 'change--contact':
+            case 'change-contact':
                 output(*change_contact(command[1:], addressbook))
             case 'show-phone':
                 output(*show_phone(command[1:], addressbook))
@@ -622,7 +622,7 @@ def main():
                 output(*add_birthday(command[1:], addressbook))
             case 'show-birthday':
                 output(*show_birthday(command[1:], addressbook))
-            case 'birthdays':
+            case 'upcoming-birthdays':
                 try:
                     days = int(command[1])
                 except IndexError:
@@ -658,7 +658,7 @@ def main():
                 output(*remove_tag_from_all(notebook))
             case 'help':
                 show_help_table()
-            case 'all':
+            case 'show-all':
                 show_table(*show_all(addressbook))
             case _:
                 output("Invalid command.", "error")
