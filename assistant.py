@@ -594,13 +594,13 @@ def main():
                 break
             case 'hello':
                 user_output("How can I help you?")
-            case 'add':
+            case 'add-contact':
                 output(*add_contact(command[1:], addressbook))
-            case 'change':
+            case 'change--contact':
                 output(*change_contact(command[1:], addressbook))
-            case 'phone':
+            case 'show-phone':
                 output(*show_phone(command[1:], addressbook))
-            case 'delete':
+            case 'delete-contact':
                 output(*delete_contact(command[1:], addressbook))
             case 'add-address':
                 output(*address(command[1:], addressbook, "add_address"))
