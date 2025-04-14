@@ -13,5 +13,3 @@ def input_error(func):
         except TypeError:
             return "Invalid command.", "error"
     return inner
-
-# + декоратор на raise

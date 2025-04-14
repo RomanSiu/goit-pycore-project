@@ -8,8 +8,7 @@ from models import Name, Phone, Birthday, Address, Email, NoteText, Title
 from record import AddressBook, Record, NoteBook, Note
 from ui_helpers import user_input, user_output, extend_contact_interactive, main_user_input
 from tableview import show_table, show_help_table
-from prompt_variants import (get_prompts, title_prompts, text_prompt, edit_note_prompt, edit_text_prompt,
-                             title_search_prompt, delete_note_prompt)
+from prompt_variants import (get_prompts, title_prompts, text_prompt, edit_note_prompt, edit_text_prompt, title_search_prompt, delete_note_prompt)
 
 
 def output(message: str, mtype: str):
@@ -369,22 +368,24 @@ def search_notes(book: NoteBook):
     if not keyword.strip():
         return "⚠️  Please, enter a keyword.", "warning"
 
-    result = book.search_notes(keyword)
-    if not result:
+    matched_notes = [note for note in book.notes
+              if keyword.lower() in note.title.value.lower()
+              or keyword.lower() in note.text.value.lower()]
+
+
+    if not matched_notes:
         return "⚠️  No matches found.", "warning"
 
-    results = ["The results of the search:"] + result
+    results = ["The results of the search:"] + [note.format_for_display() for note in matched_notes]
     output(results, "common list")
 
     add_as_tag = user_input(f"Would you like to add '{keyword}' as a 🏷️  tag to all matching notes? (Y/N):\n>  ").strip().lower()
     if add_as_tag == "y":
         count = 0
-        for note_str in result:
-            for note in book.notes:
-                if str(note) == note_str:
-                    message = note.add_tag(keyword)
-                    if message and message[1] == "success":
-                        count +=1
+        for note in matched_notes:
+            message = note.add_tag(keyword)
+            if message and message[1] == "success":
+                count +=1
         return f"Keyword '{keyword}' added as tag to {count} note(s).", "success"
     return None
 
