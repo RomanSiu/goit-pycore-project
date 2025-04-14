@@ -10,7 +10,7 @@ commands = ["hello", "help", "exit", "close", "add-contact", "change-contact", "
             "change-email", "show-email", "delete-email", "add-birthday", "show-birthday", "birthdays", "add-note",
             "find-note", "edit-note", "delete-note", "show-all-notes", "search-notes", "import-note",
             "clear-all-notes", "remove-tag", "sort-by-tag", "search-by-tag", "show-tags", "clear-all-tags",
-            "remove-tag-from-all", "clear-all-contacts"]
+            "remove-tag-from-all", "clear-all-contacts", "find-contact"]
 
 
 class FirstWordCompleter(Completer):

@@ -76,6 +76,23 @@ def change_contact(args: list, book: AddressBook) -> tuple:
 
 
 @input_error
+def find_contact(args: list, book: AddressBook) -> tuple:
+    """
+    Find a contact in the address book.
+
+    Args:
+        args (list): Argument list from command line.
+        book (AddressBook): Address book to save records.
+
+    Returns:
+        tuple: tuple with list of contacts of message.
+    """
+    keyword, *_ = args
+    records = book.find_by_keyword(keyword)
+    return records
+
+
+@input_error
 def delete_contact(args: list, book: AddressBook) -> tuple:
     """
     Delete a contact from the book.
@@ -544,7 +561,7 @@ def address(args: list, book: AddressBook, func: str) -> tuple:
 def add_email(args, book):
     name, email = args
     record = book.find(name)
-    if record:
+    if type(record) is not tuple:
         return record.add_email(email)
     return "⚠️  Contact not found.", "warning"
 
@@ -612,6 +629,8 @@ def main():
                 output(*add_contact(command[1:], addressbook))
             case 'change-contact':
                 output(*change_contact(command[1:], addressbook))
+            case 'find-contact':
+                show_table(*find_contact(command[1:], addressbook))
             case 'show-phone':
                 output(*show_phone(command[1:], addressbook))
             case 'delete-contact':

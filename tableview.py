@@ -65,6 +65,7 @@ def show_help_table():
             ("show-phone", "Show phone numbers of a contact"),
             ("delete", "Delete a contact"),
             ("show-all", "Display all contacts"),
+            ("find-contact", "Find contacts by keyword"),
             ("clear-all-contacts", "Clear all contacts")
         ],
         "🏠 ADDRESS": [
