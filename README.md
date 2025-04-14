@@ -13,27 +13,29 @@ This is the __CLI Address Book__ - an application that will simplify your work w
 # __User manual__
 
 ## 1. _Commands to work with address book:_
-| Instruction name     | Arguments     | Explanations                                               |
-|----------------------|---------------|------------------------------------------------------------|
-| "hello" or "hi"      | -             | greeting                                                   |
-| "help"               | -             | calling for help                                           |
-| "show-all"           | -             | display all the contents of the address book               |
-| "add-contact"        | (name and phone) | add phone number to the contact                            |
-| "change-contact"     | (name, old phone, new phone) | edit contact's phone                                       |
-| "show-phone"         | (name)        | show contact's phones                                      |
-| "delete-contact"     | (name)        | delete contact                                             |
-| "add-address"        | (name and address) | add address to the contact                                 |
-| "show-address"       | (name)        | show contact's address                                     |
-| "change-address"     | (name and new address) | change contact's address                                   |
-| "delete-address"     | (name)        | delete contact's address                                   |
-| "add-email"          | (name and email) | add email to the contact                                   |
-| "show-email"         | (name)        | show contact's email                                       |
-| "change-email"       | (name and new email) | change contact's email                                     |
-| "delete-email"       | (name)        | delete contact's email                                     |
-| "add-birthday"       | (name and birthday(DD.MM.YYYY)) | add birthday to the contact                                |
-| "show-birthday"      | (name)        | show contact's birthday                                    |
-| "upcoming-birthdays" | (number of days(optional)) | show the contacts that have a birthday in the next XX days |
-| "exit" or "close"    |               | Turn off the bot                                           |
+| Instruction name     | Arguments                         | Explanations                                               |
+|----------------------|-----------------------------------|------------------------------------------------------------|
+| "hello" or "hi"      | -                                 | greeting                                                   |
+| "help"               | -                                 | calling for help                                           |
+| "show-all"           | -                                 | display all the contents of the address book               |
+| "add-contact"        | (name and phone)                  | add phone number to the contact                            |
+| "change-contact"     | (name, old phone, new phone)      | edit contact's phone                                       |
+| "show-phone"         | (name)                            | show contact's phones                                      |
+| "delete-contact"     | (name)                            | delete contact                                             |
+| "add-address"        | (name and address)                | add address to the contact                                 |
+| "show-address"       | (name)                            | show contact's address                                     |
+| "change-address"     | (name and new address)            | change contact's address                                   |
+| "delete-address"     | (name)                            | delete contact's address                                   |
+| "add-email"          | (name and email)                  | add email to the contact                                   |
+| "show-email"         | (name)                            | show contact's email                                       |
+| "change-email"       | (name and new email)              | change contact's email                                     |
+| "delete-email"       | (name)                            | delete contact's email                                     |
+| "add-birthday"       | (name and birthday(DD.MM.YYYY))   | add birthday to the contact                                |
+| "show-birthday"      | (name)                            | show contact's birthday                                    |
+| "birthdays"          | (number of days(optional))        | show the contacts that have a birthday in the next XX days |
+| "find-contact"       | (keyword(name, bd, email, phone)) | find all contacts by keyword                               |
+| "clear-all-contacts" | -                                 | clear all addressbook                                      |
+| "exit" or "close"    | -                                 | Turn off the bot                                           |
 
 ## 2. _Commands to work with notes:_
 | Instruction name | Arguments              | Explanations                          |
