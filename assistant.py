@@ -40,11 +40,13 @@ def add_contact(args: list, book: AddressBook) -> tuple:
         tuple: Message.
     """
     name, phone, *_ = args
+    if phone == "":
+        return "Enter a phone number.", "warning"
     record = book.find(name)
     if type(record) is tuple:
         record = Record(name)
         message = record.add_phone(phone)
-        if message[1] in ["warrning", "error"]:
+        if message[1] in ["warning", "error"]:
             return message
         book.add_record(record)
         extend_contact_interactive(record, book)
@@ -369,9 +371,8 @@ def search_notes(book: NoteBook):
         return "⚠️  Please, enter a keyword.", "warning"
 
     matched_notes = [note for note in book.notes
-              if keyword.lower() in note.title.value.lower()
-              or keyword.lower() in note.text.value.lower()]
-
+                     if keyword.lower() in note.title.value.lower()
+                     or keyword.lower() in note.text.value.lower()]
 
     if not matched_notes:
         return "⚠️  No matches found.", "warning"
@@ -379,15 +380,16 @@ def search_notes(book: NoteBook):
     results = ["The results of the search:"] + [note.format_for_display() for note in matched_notes]
     output(results, "common list")
 
-    add_as_tag = user_input(f"Would you like to add '{keyword}' as a 🏷️  tag to all matching notes? (Y/N):\n>  ").strip().lower()
+    add_as_tag = (user_input(f"Would you like to add '{keyword}' as a 🏷️  tag to all matching notes? (Y/N):\n>  ")
+                  .strip().lower())
     if add_as_tag == "y":
         count = 0
         for note in matched_notes:
             message = note.add_tag(keyword)
             if message and message[1] == "success":
-                count +=1
+                count += 1
         return f"Keyword '{keyword}' added as tag to {count} note(s).", "success"
-    return None
+    return f"Was found {len(matched_notes)} note(s) by this keyword.", "success"
 
 
 @input_error
@@ -467,6 +469,19 @@ def sort_notes_by_tag(book: NoteBook):
     if not sorted_notes:
         return "⚠️  No notes to sort.", "warning"
     return sorted_notes, "common list"
+
+
+@input_error
+def add_tag(book: NoteBook):
+    title = user_input("Enter the title of a note:\n>  ")
+    note = book.find_note(title)
+    if not note:
+        return "⚠️  Note with this title doesn't exist.", "warning"
+    tag = user_input("Enter the 🏷️  tag to add:\n>  ")
+    if not tag.strip():
+        return "⚠️  Tag cannot be empty.", "warning"
+    message = note.add_tag(tag)
+    return message
 
 
 @input_error
@@ -656,7 +671,7 @@ def main():
                 output(*add_birthday(command[1:], addressbook))
             case 'show-birthday':
                 output(*show_birthday(command[1:], addressbook))
-            case 'upcoming-birthdays':
+            case 'birthdays':
                 try:
                     days = int(command[1])
                 except IndexError:
@@ -684,6 +699,8 @@ def main():
                 output(*search_notes_by_tag(notebook))
             case 'sort-by-tag':
                 output(*sort_notes_by_tag(notebook))
+            case 'add-tag':
+                output(*add_tag(notebook))
             case 'remove-tag':
                 output(*remove_tag(notebook))
             case 'show-tags':

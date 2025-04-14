@@ -5,12 +5,12 @@ from prompt_toolkit.completion import Completer, Completion
 init(autoreset=True)
 
 
-commands = ["hello", "help", "exit", "close", "add-contact", "change-contact", "show-phone", "delete",
+commands = ["hello", "help", "exit", "close", "add-contact", "change-contact", "show-phone", "delete-contact",
             "show-all", "add-address", "show-address", "change-address", "delete-address", "add-email",
             "change-email", "show-email", "delete-email", "add-birthday", "show-birthday", "birthdays", "add-note",
             "find-note", "edit-note", "delete-note", "show-all-notes", "search-notes", "import-note",
             "clear-all-notes", "remove-tag", "sort-by-tag", "search-by-tag", "show-tags", "clear-all-tags",
-            "remove-tag-from-all", "clear-all-contacts", "find-contact"]
+            "remove-tag-from-all", "clear-all-contacts", "find-contact", "add-tag"]
 
 
 class FirstWordCompleter(Completer):
@@ -58,12 +58,18 @@ def extend_contact_interactive(record, book):
 
     bday = ask_and_get_value("Would you like to add a birthday?")
     if bday:
-        add_birthday([name, bday], book)
+        message = add_birthday([name, bday], book)
+        if message[1] in ("warning", "error"):
+            print(Fore.YELLOW + message[0] + Style.RESET_ALL)
 
     email = ask_and_get_value("Would you like to add an email?")
     if email:
-        add_email([name, email], book)
+        message = add_email([name, email], book)
+        if message[1] in ("warning", "error"):
+            print(Fore.YELLOW + message[0] + Style.RESET_ALL)
 
     addr = ask_and_get_value("Would you like to add an address?")
     if addr:
-        address([name, addr], book, "add_address")
+        message = address([name, addr], book, "add_address")
+        if message[1] in ("warning", "error"):
+            print(Fore.YELLOW + message[0] + Style.RESET_ALL)
